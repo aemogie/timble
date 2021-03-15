@@ -2,12 +2,15 @@ package com.theaemogie.oektown.timble;
 
 import com.theaemogie.oektown.timble.listener.KeyListener;
 import com.theaemogie.oektown.timble.listener.MouseListener;
+import com.theaemogie.oektown.timble.scenes.LevelEditorScene;
+import com.theaemogie.oektown.timble.scenes.LevelScene;
+import com.theaemogie.oektown.timble.scenes.Scene;
 import com.theaemogie.oektown.util.Time;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
-import java.io.IOException;
+import java.util.Objects;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -147,6 +150,6 @@ public class Window {
         glfwDestroyWindow(glfwWindow);
 
         glfwTerminate();
-        glfwSetErrorCallback(null).free();
+        Objects.requireNonNull(glfwSetErrorCallback(null)).free();
     }
 }

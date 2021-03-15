@@ -1,6 +1,10 @@
-package com.theaemogie.oektown.timble;
+package com.theaemogie.oektown.timble.scenes;
 
 import com.theaemogie.oektown.renderer.Shader;
+import com.theaemogie.oektown.renderer.Texture;
+import com.theaemogie.oektown.timble.Camera;
+import com.theaemogie.oektown.util.Time;
+import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -16,13 +20,14 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 public class LevelEditorScene extends Scene {
 
     private Shader defaultShader;
+    private Texture spriteTexture;
 
     private float[] vertexArray = {
-            //Position              //Color                                     //Index
-             0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f, 1.0f,     //Bottom Right  #00
-            -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f, 1.0f,     //Top Left      #01
-             0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f, 1.0f,     //Top Right     #02
-            -0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 0.0f, 1.0f      //Bottom Left   #03
+            //Position              //Color                                          //Index
+            100.0f, 000.0f, 0.0f,     1.0f, 0.0f, 0.0f, 1.0f,   1, 1,  //Bottom Right #00
+            000.0f, 100.0f, 0.0f,     0.0f, 1.0f, 0.0f, 1.0f,   0, 0,  //Top Left     #01
+            100.0f, 100.0f, 0.0f,     0.0f, 0.0f, 1.0f, 1.0f,   1, 0,  //Top Right    #02
+            000.0f, 000.0f, 0.0f,     1.0f, 1.0f, 1.0f, 1.0f,   0, 1   //Bottom Left  #03
     };
     private int[] elementArray = {
 /*
@@ -43,9 +48,13 @@ public class LevelEditorScene extends Scene {
     @Override
     public void init() {
 
+        this.camera = new Camera(new Vector2f());
+
         defaultShader = new Shader("assets/shaders/default.glsl");
 
         defaultShader.compile();
+
+        this.spriteTexture = new Texture("assets/textures/sprites/sprite1.png");
 
         //region Generate VAOs, VBOs and EBOs.
         //region VAO
@@ -74,20 +83,35 @@ public class LevelEditorScene extends Scene {
 
         int positionSize = 3;
         int colorSize = 4;
-        int vertexSizeBytes = (positionSize + colorSize) * Float.BYTES;
+        int uvSize = 2;
+        int vertexSizeBytes = (positionSize + colorSize + uvSize) * Float.BYTES;
         glVertexAttribPointer(0, positionSize, GL_FLOAT, false, vertexSizeBytes, 0);
         glEnableVertexAttribArray(0);
 
         glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionSize * Float.BYTES);
         glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, uvSize, GL_FLOAT, false, vertexSizeBytes, (positionSize + colorSize) * Float.BYTES);
+        glEnableVertexAttribArray(2);
         //endregion
         //endregion
     }
 
     @Override
     public void update(double deltaTime) {
+
         //region Bind everything.
         defaultShader.use();
+
+        //Upload uniforms
+        defaultShader.uploadTexture("TEX_SAMPLER", 0);
+        glActiveTexture(GL_TEXTURE0);
+        spriteTexture.bind();
+
+        defaultShader.uploadMat4f("uProjection",camera.getProjectionMatrix());
+        defaultShader.uploadMat4f("uView",camera.getViewMatrix());
+        defaultShader.uploadFloat("uTime", (float) Time.getTime());
+
         glBindVertexArray(vaoID);
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);

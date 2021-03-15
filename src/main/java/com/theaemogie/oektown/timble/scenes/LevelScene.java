@@ -1,4 +1,4 @@
-package com.theaemogie.oektown.timble;
+package com.theaemogie.oektown.timble.scenes;
 
 /**
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
