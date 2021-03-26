@@ -1,11 +1,11 @@
-package com.theaemogie.oektown.timble;
+package com.theaemogie.learninggame.gameengine;
 
-import com.theaemogie.oektown.timble.listener.KeyListener;
-import com.theaemogie.oektown.timble.listener.MouseListener;
-import com.theaemogie.oektown.timble.scenes.LevelEditorScene;
-import com.theaemogie.oektown.timble.scenes.LevelScene;
-import com.theaemogie.oektown.timble.scenes.Scene;
-import com.theaemogie.oektown.util.Time;
+import com.theaemogie.learninggame.gameengine.listener.KeyListener;
+import com.theaemogie.learninggame.gameengine.listener.MouseListener;
+import com.theaemogie.learninggame.gameengine.scenes.LevelEditorScene;
+import com.theaemogie.learninggame.gameengine.scenes.LevelScene;
+import com.theaemogie.learninggame.gameengine.scenes.Scene;
+import com.theaemogie.learninggame.util.Time;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -15,6 +15,7 @@ import java.util.Objects;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -46,15 +47,21 @@ public class Window {
             case 0:
                 currentScene = new LevelEditorScene();
                 currentScene.init();
+                currentScene.start();
                 break;
             case 1:
                 currentScene = new LevelScene();
                 currentScene.init();
+                currentScene.start();
                 break;
             default:
                 assert false : "Invalid scene " + newScene + "!";
                 break;
         }
+    }
+
+    public static Scene getCurrentScene() {
+        return get().currentScene;
     }
 
     public static Window get() {
@@ -86,6 +93,7 @@ public class Window {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); //Resizable to true in-case default doesn't work
         glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
         glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_TRUE);
+
 
         //Create window
         glfwWindow = glfwCreateWindow(this.WIDTH, this.HEIGHT, this.TITLE, NULL, NULL); //The long is the memory address of the window.

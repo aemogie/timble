@@ -1,4 +1,4 @@
-package com.theaemogie.oektown.util;
+package com.theaemogie.learninggame.util;
 
 import static org.lwjgl.glfw.GLFW.*;
 

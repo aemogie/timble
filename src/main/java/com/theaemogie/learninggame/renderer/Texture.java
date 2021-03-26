@@ -1,4 +1,4 @@
-package com.theaemogie.oektown.renderer;
+package com.theaemogie.learninggame.renderer;
 
 import org.lwjgl.BufferUtils;
 
