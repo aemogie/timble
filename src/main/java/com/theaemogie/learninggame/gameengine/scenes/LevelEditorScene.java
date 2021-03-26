@@ -1,61 +1,43 @@
 package com.theaemogie.learninggame.gameengine.scenes;
 
 import com.theaemogie.learninggame.components.SpriteRenderer;
+import com.theaemogie.learninggame.components.SpriteSheet;
 import com.theaemogie.learninggame.gameengine.Camera;
 import com.theaemogie.learninggame.gameengine.GameObject;
 import com.theaemogie.learninggame.gameengine.Transform;
+import com.theaemogie.learninggame.util.AssetPool;
 import org.joml.Vector2f;
-import org.joml.Vector4f;
 
 /**
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
  */
 public class LevelEditorScene extends Scene {
 
+    private final String spriteSheet1Path = "src/main/resources/assets/textures/sprites/sprite1_spritesheet.png";
     public LevelEditorScene() {
 
     }
 
     @Override
     public void init() {
+        loadResources();
+
         this.camera = new Camera(new Vector2f());
 
-        int xOffset = 10;
-        int yOffset = 10;
+        SpriteSheet sprites = AssetPool.getSpriteSheet(spriteSheet1Path);
 
-        float totalWidth = (float) (600 - xOffset * 2);
-        float totalHeight = (float) (300 - yOffset * 2);
-        float sizeX = totalWidth / 100.0f;
-        float sizeY = totalHeight / 100.0f;
-        float padding = 3;
+        GameObject sprite1 = new GameObject("Sprite 1", new Transform(new Vector2f(100, 100), new Vector2f(256, 256)));
+        sprite1.addComponent(new SpriteRenderer(sprites.getSprite(0)));
+        this.addGameObjectToScene(sprite1);
 
-        for (int x = 0; x < 100; x++) {
-            for (int y = 0; y < 100; y++) {
-                float xPos = xOffset + (x * sizeX) + (padding * x);
-                float yPos = yOffset + (y * sizeY) + (padding * y);
+        GameObject sprite2 = new GameObject("Sprite 2", new Transform(new Vector2f(400, 100), new Vector2f(256, 256)));
+        sprite2.addComponent(new SpriteRenderer(sprites.getSprite(1)));
+        this.addGameObjectToScene(sprite2);
+    }
 
-                GameObject go = new GameObject(
-                        "Object " + x + "" + y,
-                        new Transform(
-                                new Vector2f(xPos, yPos), //Position
-                                new Vector2f(sizeX, sizeY) //Scale
-                        )
-                );
-
-                go.addComponent(
-                        new SpriteRenderer(
-                                new Vector4f(
-                                        xPos / totalWidth,
-                                        yPos / totalHeight,
-                                        1,
-                                        1
-                                )
-                        )
-                );
-                this.addGameObjectToScene(go);
-            }
-        }
-
+    private void loadResources() {
+        AssetPool.getShader("src/main/resources/assets/shaders/default.glsl");
+        AssetPool.addSpriteSheet(spriteSheet1Path, new SpriteSheet(AssetPool.getTexture(spriteSheet1Path), 16, 16, 4, 0));
     }
 
     @Override

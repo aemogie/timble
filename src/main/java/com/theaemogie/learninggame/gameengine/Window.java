@@ -25,8 +25,8 @@ public class Window {
 
     private static Window window = null;
     private static Scene currentScene;
-    private final int WIDTH;
-    private final int HEIGHT;
+    public final int WIDTH;
+    public final int HEIGHT;
     private final String TITLE;
     public float r;
     public float g;
