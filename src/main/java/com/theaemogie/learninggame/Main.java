@@ -1,6 +1,6 @@
-package com.theaemogie.oektown;
+package com.theaemogie.learninggame;
 
-import com.theaemogie.oektown.timble.Window;
+import com.theaemogie.learninggame.gameengine.Window;
 
 /**
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
