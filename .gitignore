@@ -4,3 +4,6 @@
 /build/
 /build/classes/java/main/
 /gradle/
+/src/main/resources/assets/textures/paint.net projects/sprites/
+/.run/
+/src/main/java/com/theaemogie/test/
