@@ -44,4 +44,8 @@ public class FrameBuffer {
 	public int getTextureID() {
 		return texture.getTextureID();
 	}
+	
+	public Texture getTexture() {
+		return texture;
+	}
 }

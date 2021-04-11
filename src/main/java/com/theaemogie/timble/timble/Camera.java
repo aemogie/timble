@@ -23,14 +23,13 @@ public class Camera {
         this.projectionSize = new Vector2f(32.0f * 40.0f,32.0f * 21.0f);
         adjustProjection();
     }
-    
 
     public void adjustProjection() {
         projectionMatrix.identity();
         projectionMatrix.ortho(0.0f, projectionSize.x * zoom, 0.0f, projectionSize.y * zoom, 0.0f, 100.0f);
         projectionMatrix.invert(inverseProjectionMatrix);
     }
-
+    
     public Matrix4f getViewMatrix() {
         Vector3f cameraFront = new Vector3f(0.0f, 0.0f, -1.0f);
         Vector3f cameraUp = new Vector3f(0.0f, 1.0f, 0.0f);
@@ -45,17 +44,30 @@ public class Camera {
 
         return this.viewMatrix;
     }
-
+    
     public Matrix4f getProjectionMatrix() {
         return projectionMatrix;
     }
-
+    
     public Matrix4f getInverseProjectionMatrix() {
         return this.inverseProjectionMatrix;
     }
-
+    
     public Matrix4f getInverseViewMatrix() {
         return this.inverseViewMatrix;
+    }
+    
+    public void smoothFollow(Window window, Transform follow) {
+        this.smoothFollow(window, follow, 0.045f);
+    }
+    
+    public void smoothFollow(Window window, Transform follow, float smoothing) {
+        Vector2f desiresPos = new Vector2f(follow.position).sub(new Vector2f(window.getWidth() / 2f, window.getHeight() / 2f).mul(zoom));
+        if (desiresPos.x >= 0 && desiresPos.y >= 0) {
+            position = new Vector2f(position).lerp(desiresPos, smoothing);
+        } else {
+            position = new Vector2f(position).lerp(new Vector2f(desiresPos.x >= 0 ? desiresPos.x : 0, desiresPos.y >= 0 ? desiresPos.y : 0), smoothing);
+        }
     }
     
     public float getZoom() {

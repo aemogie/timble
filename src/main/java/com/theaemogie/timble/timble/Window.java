@@ -13,7 +13,6 @@ import com.theaemogie.timble.scenes.LevelScene;
 import com.theaemogie.timble.scenes.Scene;
 import com.theaemogie.timble.util.AssetPool;
 import com.theaemogie.timble.util.Time;
-import imgui.app.Configuration;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -37,14 +36,35 @@ public class Window {
 	private Scene currentScene;
 	private long glfwWindow;
 	
-	private GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	private int targetWidth = 1366;
-	private int targetHeight = 768;
-	private float targetAspectRatio;
+	private GLFWVidMode videoMode = Objects.requireNonNull(glfwGetVideoMode(glfwGetPrimaryMonitor()));
 	private int width, height;
 	private ImGuiLayer imGuiLayer;
 	private FrameBuffer frameBuffer;
 	private PickingTexture pickingTexture;
+	
+	//region Constructors.
+	private Window(String title) {
+		this(title, 1366, 768);
+	}
+	
+	private Window(String title, int width, int height) {
+		this(title, width, height, new Vector3f(0.2f, 0.2f, 0.2f));
+	}
+	
+	private Window(String title, int width, int height, Vector3f color) {
+		this(title, width, height, color, true);
+	}
+	
+	private Window(String title, int width, int height, Vector3f color, boolean vsync) {
+		this.width = width;
+		this.height = height;
+		this.title = title;
+		this.r = color.x;
+		this.g = color.y;
+		this.b = color.z;
+		this.vsync = vsync;
+	}
+	//endregion
 	
 	//region Create windows.
 	public static Window create(String title) {
@@ -87,39 +107,18 @@ public class Window {
 	}
 	//endregion
 	
-	//region Constructors.
-	private Window(String title) {
-		this(title, 1366, 768);
-	}
-	
-	private Window(String title, int width, int height) {
-		this(title, width, height, new Vector3f(0.2f, 0.2f, 0.2f));
-	}
-	
-	private Window(String title, int width, int height, Vector3f color) {
-		this(title, width, height, color, true);
-	}
-	
-	private Window(String title, int width, int height, Vector3f color, boolean vsync) {
-		this.width = this.targetWidth = width;
-		this.height = this.targetHeight = height;
-		this.targetAspectRatio = (float) targetWidth / (float) targetHeight;
-		this.title = title;
-		this.r = color.x;
-		this.g = color.y;
-		this.b = color.z;
-		this.vsync = vsync;
-	}
-	//endregion
-	
 	//region Main stuff: initialize, loop, destroy.
-	public void run() {
-		windowInit();
+	public void run(int scene) {
+		windowInit(scene);
 		windowLoop();
 		windowDestroy();
 	}
 	
-	public void windowInit() {
+	public void run() {
+		this.run(0);
+	}
+	
+	public void windowInit(int scene) {
 		//Properties
 		glfwDefaultWindowHints(); //Default window hints
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); //Invisible till setup is complete
@@ -128,10 +127,12 @@ public class Window {
 		
 		// Create the window
 		glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL); //The long is the memory address of the window.
+		
 		if (glfwWindow == NULL) {
 			throw new IllegalStateException("Failed to create GLFW Window!");
 		}
 		
+		// TODO: 4/11/2021 Port to Dev Kit.
 		//region Callback setup
 		glfwSetCursorPosCallback(glfwWindow, MouseListener::mousePositionCallback);
 		glfwSetMouseButtonCallback(glfwWindow, MouseListener::mouseButtonCallback);
@@ -161,20 +162,19 @@ public class Window {
 		
 		// Set resize callback after we make the current context.
 		glfwSetWindowSizeCallback(glfwWindow, (window, width, height) -> WindowResizeListener.resizeCallback(this, width, height));
-
-//		videoMode = Objects.requireNonNull(glfwGetVideoMode(glfwGetPrimaryMonitor()));
-		this.targetWidth = videoMode.width();
-		this.targetHeight = videoMode.height();
-		this.targetAspectRatio = (float) this.targetWidth / (float) this.targetHeight;
+		
+		this.width = videoMode.width();
+		this.height = videoMode.height();
+		
+		Window.this.changeScene(scene);
+		
+		if (currentScene instanceof LevelEditorScene) {
+			imGuiLayer = new ImGuiLayer(glfwWindow, pickingTexture);
+		}
 		
 		this.frameBuffer = new FrameBuffer(width, height);
 		this.pickingTexture = new PickingTexture(width, height);
 		glViewport(0, 0, width, height);
-		
-		this.imGuiLayer = new ImGuiLayer(glfwWindow, pickingTexture);
-		this.imGuiLayer.initImGui(new Configuration());
-		
-		Window.this.changeScene(0);
 	}
 	
 	public void windowLoop() {
@@ -187,6 +187,9 @@ public class Window {
 		Shader pickingShader = AssetPool.getShader("src/main/resources/assets/shaders/Picking.glsl");
 		
 		while (!glfwWindowShouldClose(glfwWindow)) {
+			
+			glfwSetWindowTitle(glfwWindow,title + " - " +  currentScene.getClass().getSimpleName());
+			
 			// Poll events
 			glfwPollEvents();
 			
@@ -206,10 +209,10 @@ public class Window {
 			//endregion
 			
 			//Render pass 2. Render to game.
-			
 			DebugDraw.beginFrame();
 			
 			this.frameBuffer.bind();
+			
 			glClearColor(r, g, b, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			
@@ -219,9 +222,12 @@ public class Window {
 				currentScene.update(this, deltaTime);
 				currentScene.render(this);
 			}
+			
 			this.frameBuffer.unbind();
 			
-			this.imGuiLayer.update(this, (float) deltaTime, currentScene);
+			if (currentScene instanceof LevelEditorScene) {
+				this.imGuiLayer.update(this, (float) deltaTime, currentScene);
+			}
 			
 			glfwSwapBuffers(glfwWindow);
 			
@@ -237,7 +243,9 @@ public class Window {
 	private void windowDestroy() {
 		glfwFreeCallbacks(glfwWindow);
 		glfwDestroyWindow(glfwWindow);
-		imGuiLayer.disposeImGui();
+		if (currentScene instanceof LevelEditorScene) {
+			imGuiLayer.disposeImGui();
+		}
 		
 		glfwTerminate();
 		Objects.requireNonNull(glfwSetErrorCallback(null)).free();
@@ -259,7 +267,7 @@ public class Window {
 		}
 		
 		this.currentScene.load();
-		this.currentScene.init();
+		this.currentScene.init(this);
 		this.currentScene.start();
 	}
 	

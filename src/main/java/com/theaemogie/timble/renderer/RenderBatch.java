@@ -114,7 +114,7 @@ public class RenderBatch {
 		glEnableVertexAttribArray(4);
 		//endregion
 	}
-	
+	 
 	private int[] generateIndices() {
 		//6 indices per quad (3 per triangle * 2 triangles)
 		int[] elements = new int[6 * maxBatchSize];

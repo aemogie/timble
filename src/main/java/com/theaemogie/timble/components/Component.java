@@ -24,9 +24,7 @@ public abstract class Component {
 
     }
 
-    public void update(Window window, double deltaTime){
-
-    }
+    public void update(Window window, double deltaTime){}
 
     public void imGui() {
 
