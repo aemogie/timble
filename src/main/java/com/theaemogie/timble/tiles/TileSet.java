@@ -43,9 +43,8 @@ public class TileSet {
 							))
 					));
 			//endregion
-			scene.addGameObjectToScene(gameObjects[x][y]);
+			scene.addTilesToScene(gameObjects[x][y]);
 		}}
-		System.out.println(prevSize);
 		prevSize += spriteSheet.size();
 	}
 	

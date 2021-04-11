@@ -4,8 +4,8 @@ import com.theaemogie.timble.components.EditorCamera;
 import com.theaemogie.timble.components.GridLines;
 import com.theaemogie.timble.components.MouseControls;
 import com.theaemogie.timble.components.SpriteRenderer;
-import com.theaemogie.timble.tiles.SpriteSheet;
 import com.theaemogie.timble.scenes.Scene;
+import com.theaemogie.timble.tiles.SpriteSheet;
 import com.theaemogie.timble.tiles.TileSet;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Transform;
@@ -22,10 +22,6 @@ import java.nio.file.Paths;
  */
 public class LevelEditorScene extends Scene {
 	
-	
-	transient SpriteRenderer characterSpriteRenderer;
-	transient float random = 0.0f;
-	private transient GameObject character;
 	private GameObject levelEditorComponents = null;
 	
 	public LevelEditorScene() {
@@ -33,9 +29,8 @@ public class LevelEditorScene extends Scene {
 	}
 	
 	@Override
-	public void init() {
-		super.init();
-		
+	public void init(Window window) {
+		super.init(window);
 		if (levelEditorComponents == null) {
 			levelEditorComponents = new GameObject("Level Editor Components", new Transform());
 			levelEditorComponents.addComponent(new MouseControls());
@@ -45,45 +40,25 @@ public class LevelEditorScene extends Scene {
 		levelEditorComponents.getComponent(EditorCamera.class).init(this.camera);
 		
 		loadResources();
-		SpriteSheet landscapeSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/landscapes.png");
+		SpriteSheet landscapeSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/tilemap/landscapes.png");
 		landscapeSpriteSheet.setLayerID(0);
-		SpriteSheet decorSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/manmade.png");
+		SpriteSheet decorSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/tilemap/manmade.png");
 		decorSpriteSheet.setLayerID(1);
-		SpriteSheet natureSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/nature.png");
+		SpriteSheet natureSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/tilemap/nature.png");
 		natureSpriteSheet.setLayerID(2);
 		
-		gameObjects.remove(null);
-		if (levelLoaded) {
-			return;
-		}
-		new TileSet("src/main/resources/assets/textures/external/tiled/map.json", landscapeSpriteSheet, 100, 100, 32, 32, this);
-		new TileSet("src/main/resources/assets/textures/external/tiled/map.json", decorSpriteSheet, 100, 100, 32, 32, this);
-		new TileSet("src/main/resources/assets/textures/external/tiled/map.json", natureSpriteSheet, 100, 100, 32, 32, this);
-
-/*        addGameObjectToScene(
-                new GameObject(
-                        "Character",
-                        new Transform(
-                                new Vector2f(100, 200),
-                                new Vector2f(32, 32)
-                        )
-                )
-                        .gameObjectGen(
-                                characterSprites.getSprite(12),
-                                new RigidBody()
-                        )
-        );*/
-		
+		new TileSet("src/main/resources/assets/tilemap/map.json", landscapeSpriteSheet, 100, 100, 32, 32, this);
+		new TileSet("src/main/resources/assets/tilemap/map.json", decorSpriteSheet, 100, 100, 32, 32, this);
+		new TileSet("src/main/resources/assets/tilemap/map.json", natureSpriteSheet, 100, 100, 32, 32, this);
 	}
 	
-	private void loadResources() {
-		AssetPool.getShader("src/main/resources/assets/shaders/Default.glsl");
-		
+	@Override
+	protected void loadResources() {
 		//region Landscapes SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/textures/tilemap/landscapes.png",
+				"src/main/resources/assets/tilemap/landscapes.png",
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/landscapes.png"),
+						AssetPool.getTexture("src/main/resources/assets/tilemap/landscapes.png"),
 						16,
 						16,
 						256,
@@ -93,9 +68,9 @@ public class LevelEditorScene extends Scene {
 		//endregion
 		//region Decor SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/textures/tilemap/manmade.png",
+				"src/main/resources/assets/tilemap/manmade.png",
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/manmade.png"),
+						AssetPool.getTexture("src/main/resources/assets/tilemap/manmade.png"),
 						16,
 						16,
 						64,
@@ -105,9 +80,9 @@ public class LevelEditorScene extends Scene {
 		//endregion
 		//region Nature SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/textures/tilemap/nature.png",
+				"src/main/resources/assets/tilemap/nature.png",
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/nature.png"),
+						AssetPool.getTexture("src/main/resources/assets/tilemap/nature.png"),
 						16,
 						16,
 						64,
@@ -115,25 +90,13 @@ public class LevelEditorScene extends Scene {
 				)
 		);
 		//endregion
-		
-		for (GameObject gameObject : gameObjects) {
-			if (gameObject.getComponent(SpriteRenderer.class) != null) {
-				SpriteRenderer spriteRenderer = gameObject.getComponent(SpriteRenderer.class);
-				if (spriteRenderer.getTexture() != null) {
-					spriteRenderer.setTexture(AssetPool.getTexture(spriteRenderer.getTexture().getFilepath()));
-				}
-			}
-		}
+		super.loadResources();
 	}
 	
 	@Override
 	public void update(Window window, double deltaTime) {
-		
 		levelEditorComponents.update(window, deltaTime);
-		
-		for (GameObject go : this.gameObjects) {
-			go.update(window, deltaTime);
-		}
+		super.update(window, deltaTime);
 	}
 	
 	@Override
@@ -155,18 +118,12 @@ public class LevelEditorScene extends Scene {
 	
 	@Override
 	public void load() {
-		
 		String editorComponentsFile = "";
-		
 		try {
 			editorComponentsFile = new String(Files.readAllBytes(Paths.get(".run/editorComponents.dat")));
-		} catch (IOException ignored) {
-		}
-		
-		if (!editorComponentsFile.equals("")) {
+		} catch (IOException ignored) {}
+		if (!(editorComponentsFile.equals("") || editorComponentsFile.equals("{}"))) {
 			this.levelEditorComponents = gson.fromJson(editorComponentsFile, GameObject.class);
 		}
-		
-		super.load();
 	}
 }

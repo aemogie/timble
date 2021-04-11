@@ -61,4 +61,8 @@ public class TimbleMath {
         mappedVal += targetStart; //Add the start of required range so that it is back in the range it was supposed to be.
         return mappedVal;
     }
+    
+    public static float dist(Vector2f pos1, Vector2f pos2) {
+        return (float) Math.hypot(pos1.x - pos2.x, pos1.y - pos2.y);
+    }
 }

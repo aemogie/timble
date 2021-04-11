@@ -43,8 +43,9 @@ public class Sprite {
         return texture == null ? -1 : texture.getTextureID();
     }
 
-    public void setTexture(Texture texture) {
+    public Sprite setTexture(Texture texture) {
         this.texture = texture;
+        return this;
     }
 
     public void setTextureCoords(Vector2f[] textureCoords) {

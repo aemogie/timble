@@ -10,7 +10,7 @@ public class Main {
 	public static Window mainWindow;
 	
 	public static void main(String[] args) {
-		mainWindow = Window.create("Learning Game Engine Window");
-		mainWindow.run();
+		mainWindow = Window.create("Timble");
+		mainWindow.run(0);
 	}
 }

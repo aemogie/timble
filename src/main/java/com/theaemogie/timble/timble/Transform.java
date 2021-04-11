@@ -20,6 +20,10 @@ public class Transform {
     public Transform(Vector2f position, Vector2f scale) {
         init(position, scale);
     }
+    
+    public Transform(float posX, float posY,float scaleX, float scaleY) {
+        init(new Vector2f(posX, posY), new Vector2f(scaleX, scaleY));
+    }
 
     public void init(Vector2f position, Vector2f scale) {
         this.position = position;

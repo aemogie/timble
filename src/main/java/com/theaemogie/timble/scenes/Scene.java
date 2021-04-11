@@ -3,10 +3,13 @@ package com.theaemogie.timble.scenes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.theaemogie.timble.components.Component;
+import com.theaemogie.timble.components.SpriteRenderer;
 import com.theaemogie.timble.renderer.Renderer;
+import com.theaemogie.timble.tiles.SpriteSheet;
 import com.theaemogie.timble.timble.Camera;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Window;
+import com.theaemogie.timble.util.AssetPool;
 import com.theaemogie.timble.util.typeadapter.ComponentTypeAdapter;
 import com.theaemogie.timble.util.typeadapter.GameObjectTypeAdapter;
 import org.joml.Vector2f;
@@ -29,11 +32,12 @@ public abstract class Scene {
 	protected List<GameObject> gameObjects = new ArrayList<>();
 	protected transient boolean levelLoaded;
 	private transient boolean isRunning = false;
+	private List<GameObject> tiles = new ArrayList<>();
 	
 	public Scene() {
 	}
 	
-	public void init() {
+	public void init(Window window) {
 		if (camera == null) {
 			camera = new Camera();
 			camera.init(new Vector2f());
@@ -43,11 +47,21 @@ public abstract class Scene {
 	}
 	
 	public void start() {
-		for (GameObject go : gameObjects) {
-			go.start();
-			this.renderer.add(go);
-		}
+		tiles.forEach(GameObject::start);
+		tiles.forEach(tile -> renderer.add(tile));
+		gameObjects.forEach(GameObject::start);
+		gameObjects.forEach(gameObject -> renderer.add(gameObject));
 		isRunning = true;
+	}
+	
+	public void addTilesToScene(GameObject tile) {
+		if (!isRunning) {
+			tiles.add(tile);
+		} else {
+			tiles.add(tile);
+			tile.start();
+			this.renderer.add(tile);
+		}
 	}
 	
 	public void addGameObjectToScene(GameObject gameObject) {
@@ -60,9 +74,33 @@ public abstract class Scene {
 		}
 	}
 	
-	public abstract void update(Window window, double deltaTime);
+	protected void loadResources() {
+		for (GameObject tile : tiles) {
+			if (tile.getComponent(SpriteRenderer.class) != null) {
+				SpriteRenderer spriteRenderer = tile.getComponent(SpriteRenderer.class);
+				if (spriteRenderer.getTexture() != null) {
+					spriteRenderer.setTexture(AssetPool.getTexture(spriteRenderer.getTexture().getFilepath()));
+				}
+			}
+		}
+		for (GameObject gameObject : gameObjects) {
+			if (gameObject.getComponent(SpriteRenderer.class) != null) {
+				SpriteRenderer spriteRenderer = gameObject.getComponent(SpriteRenderer.class);
+				if (spriteRenderer.getTexture() != null) {
+					spriteRenderer.setTexture(AssetPool.getTexture(spriteRenderer.getTexture().getFilepath()));
+				}
+			}
+		}
+	}
 	
-	public abstract void render(Window window);
+	public void update(Window window, double deltaTime) {
+		tiles.forEach(tile -> tile.update(window, deltaTime));
+		gameObjects.forEach(gameObject -> gameObject.update(window, deltaTime));
+	}
+	
+	public void render(Window window) {
+		this.renderer.render(window);
+	}
 	
 	public Camera getCamera() {
 		return camera;
@@ -73,15 +111,12 @@ public abstract class Scene {
 	}
 	
 	public GameObject getGameObject(int ID) {
-		Optional<GameObject> result = this.gameObjects.stream()
-				.filter(gameObject -> gameObject.getUUID() == ID)
-				.findFirst();
-		return result.orElse(null);
+		Optional<GameObject> result = this.gameObjects.stream().filter(gameObject -> gameObject.getUUID() == ID).findFirst();
+		GameObject tileResult = this.tiles.stream().filter(tile -> tile.getUUID() == ID).findFirst().get();
+		return result.orElse(tileResult);
 	}
 	
-	public void imGui(Window window) {
-	
-	}
+	public void imGui(Window window) {}
 	
 	//region GSON stuff.
 	
@@ -119,11 +154,11 @@ public abstract class Scene {
 			gameObjectsFile = new String(Files.readAllBytes(Paths.get(".run/gameObjects.dat")));
 		} catch (IOException ignored) {}
 		
-		if (!cameraFile.equals("")) {
+		if (!(cameraFile.equals("") || cameraFile.equals("{}"))) {
 			this.camera = gson.fromJson(cameraFile, Camera.class);
 		}
 		
-		if (!gameObjectsFile.equals("")) {
+		if (!(gameObjectsFile.equals("") || gameObjectsFile.equals("[]"))) {
 			int maxGameObjectID = -1;
 			int maxComponentID = -1;
 			
@@ -148,7 +183,6 @@ public abstract class Scene {
 			Component.init(maxComponentID);
 			levelLoaded = true;
 		}
-		
 	}
 	//endregion
 	

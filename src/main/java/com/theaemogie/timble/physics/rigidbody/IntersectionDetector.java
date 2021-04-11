@@ -15,9 +15,12 @@ public class IntersectionDetector {
     //======================================================
     //"Point on" Tests.
     //======================================================
-    public static boolean pointOnLine(Vector2f point, Line line) {
+    public static boolean pointAndLine(Vector2f point, Line line) {
         float dy = line.getEnd().y - line.getStart().y;
         float dx = line.getEnd().x - line.getStart().x;
+        if (dx == 0f) {
+            return TimbleMath.compare(point.x, line.getStart().x);
+        }
         float gradient = dy/dx;
 
         //y = mx + c
@@ -29,14 +32,14 @@ public class IntersectionDetector {
         return point.y == gradient * point.x + intercept;
     }
 
-    public static boolean pointInCircle(Vector2f point, Circle circle) {
+    public static boolean pointAndCircle(Vector2f point, Circle circle) {
         Vector2f circleCenter = circle.getCenter();
         Vector2f centerToPoint = new Vector2f(point).sub(circleCenter);
 
         return centerToPoint.lengthSquared() <= circle.getRadius() * circle.getRadius();
     }
 
-    public static boolean pointInAABB(Vector2f point, AABB box) {
+    public static boolean pointAndAABB(Vector2f point, AABB box) {
         Vector2f min = box.getMin();
         Vector2f max = box.getMax();
 
@@ -47,12 +50,12 @@ public class IntersectionDetector {
                 point.y <= max.y;
     }
 
-    public static boolean pointInBox2D(Vector2f point, OBB box) {
+    public static boolean pointAndOBB(Vector2f point, OBB obb) {
         Vector2f pointLocalBoxSpace = new Vector2f(point);
-        TimbleMath.rotate(pointLocalBoxSpace, box.getRigidBody().getPosition(), box.getRigidBody().getRotation());
+        TimbleMath.rotate(pointLocalBoxSpace, obb.getRigidBody().getPosition(), obb.getRigidBody().getRotation());
 
-        Vector2f min = box.getMin();
-        Vector2f max = box.getMax();
+        Vector2f min = obb.getMin();
+        Vector2f max = obb.getMax();
 
         return
                 min.x <= pointLocalBoxSpace.x &&
@@ -60,8 +63,30 @@ public class IntersectionDetector {
                 min.y <= pointLocalBoxSpace.y &&
                 pointLocalBoxSpace.y <= max.y;
     }
-
+    
     //======================================================
     //"Line on" Tests.
     //======================================================
+    public static boolean lineAndCircle(Line line, Circle circle) {
+        if (pointAndCircle(line.getStart(), circle) || pointAndCircle(line.getEnd(), circle)) {
+            return true;
+        }
+        
+        Vector2f ab = new Vector2f(line.getEnd()).sub(line.getStart());
+        
+        //"Project" circle's position to line segment. -> t
+        Vector2f circlePos = circle.getCenter();
+        Vector2f circlePosToLineStart = new Vector2f(circlePos).sub(line.getStart());
+        float t = circlePosToLineStart.dot(ab) / ab.dot(ab);
+    
+        //Check if t is on line segment.
+        if (t < 0.0f || t > 1.0f) {
+            return false;
+        }
+        
+        //Find closest point to line segment.
+        Vector2f closestPoint = new Vector2f(line.getStart()).add(ab.mul(t));
+    
+        return pointAndCircle(closestPoint, circle);
+    }
 }
