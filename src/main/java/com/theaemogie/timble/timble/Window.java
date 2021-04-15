@@ -1,18 +1,16 @@
 package com.theaemogie.timble.timble;
 
 import com.theaemogie.timble.editor.LevelEditorScene;
-import com.theaemogie.timble.editor.PickingTexture;
+import com.theaemogie.timble.tiles.PickingTexture;
 import com.theaemogie.timble.eventhandlers.KeyListener;
 import com.theaemogie.timble.eventhandlers.MouseListener;
 import com.theaemogie.timble.eventhandlers.WindowResizeListener;
-import com.theaemogie.timble.renderer.DebugDraw;
-import com.theaemogie.timble.renderer.FrameBuffer;
-import com.theaemogie.timble.renderer.Renderer;
-import com.theaemogie.timble.renderer.Shader;
+import com.theaemogie.timble.renderer.*;
 import com.theaemogie.timble.scenes.LevelScene;
 import com.theaemogie.timble.scenes.Scene;
 import com.theaemogie.timble.util.AssetPool;
 import com.theaemogie.timble.util.Time;
+import imgui.app.Configuration;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -23,6 +21,7 @@ import java.util.Objects;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -38,7 +37,7 @@ public class Window {
 	
 	private GLFWVidMode videoMode = Objects.requireNonNull(glfwGetVideoMode(glfwGetPrimaryMonitor()));
 	private int width, height;
-	private ImGuiLayer imGuiLayer;
+	public ImGuiLayer imGuiLayer;
 	private FrameBuffer frameBuffer;
 	private PickingTexture pickingTexture;
 	
@@ -114,10 +113,6 @@ public class Window {
 		windowDestroy();
 	}
 	
-	public void run() {
-		this.run(0);
-	}
-	
 	public void windowInit(int scene) {
 		//Properties
 		glfwDefaultWindowHints(); //Default window hints
@@ -168,12 +163,14 @@ public class Window {
 		
 		Window.this.changeScene(scene);
 		
-		if (currentScene instanceof LevelEditorScene) {
-			imGuiLayer = new ImGuiLayer(glfwWindow, pickingTexture);
-		}
-		
 		this.frameBuffer = new FrameBuffer(width, height);
 		this.pickingTexture = new PickingTexture(width, height);
+		
+		if (currentScene instanceof LevelEditorScene) {
+			imGuiLayer = new ImGuiLayer(glfwWindow, pickingTexture);
+			imGuiLayer.initImGui(new Configuration());
+		}
+		
 		glViewport(0, 0, width, height);
 	}
 	
@@ -197,7 +194,7 @@ public class Window {
 			glDisable(GL_BLEND);
 			pickingTexture.enableWriting();
 			
-			glViewport(0, 0, width, height);
+//			glViewport(0, 0, width, height);
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
@@ -211,7 +208,7 @@ public class Window {
 			//Render pass 2. Render to game.
 			DebugDraw.beginFrame();
 			
-			this.frameBuffer.bind();
+			currentScene.preFrame(this);
 			
 			glClearColor(r, g, b, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -223,11 +220,7 @@ public class Window {
 				currentScene.render(this);
 			}
 			
-			this.frameBuffer.unbind();
-			
-			if (currentScene instanceof LevelEditorScene) {
-				this.imGuiLayer.update(this, (float) deltaTime, currentScene);
-			}
+			currentScene.postFrame(this, deltaTime);
 			
 			glfwSwapBuffers(glfwWindow);
 			
@@ -237,16 +230,12 @@ public class Window {
 			deltaTime = endTime - startTime;
 			startTime = endTime;
 		}
-		currentScene.saveExit();
 	}
 	
 	private void windowDestroy() {
 		glfwFreeCallbacks(glfwWindow);
 		glfwDestroyWindow(glfwWindow);
-		if (currentScene instanceof LevelEditorScene) {
-			imGuiLayer.disposeImGui();
-		}
-		
+		currentScene.end(this);
 		glfwTerminate();
 		Objects.requireNonNull(glfwSetErrorCallback(null)).free();
 	}
@@ -254,21 +243,21 @@ public class Window {
 	
 	//region Get and set scenes.
 	public void changeScene(int newScene) {
+		if (currentScene != null) currentScene.end(this);
 		switch (newScene) {
 			case 0:
-				this.currentScene = new LevelEditorScene();
+				currentScene = new LevelEditorScene();
 				break;
 			case 1:
-				this.currentScene = new LevelScene();
+				currentScene = new LevelScene();
 				break;
 			default:
 				assert false : "Unknown scene '" + newScene + "'!";
 				break;
 		}
-		
-		this.currentScene.load();
-		this.currentScene.init(this);
-		this.currentScene.start();
+		currentScene.load();
+		currentScene.init(this);
+		currentScene.start();
 	}
 	
 	public Scene getCurrentScene() {

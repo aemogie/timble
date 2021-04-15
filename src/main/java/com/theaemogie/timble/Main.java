@@ -9,8 +9,8 @@ public class Main {
 	
 	public static Window mainWindow;
 	
-	public static void main(String[] args) {
-		mainWindow = Window.create("Timble");
-		mainWindow.run(0);
+	public static void main(String... args) {
+		mainWindow = Window.create("Timble Game Engine (By Aemogie.)");
+		mainWindow.run(1);
 	}
 }

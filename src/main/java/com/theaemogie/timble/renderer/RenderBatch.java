@@ -220,7 +220,7 @@ public class RenderBatch {
 		// Find offset within array (4 vertices per sprite)
 		int offset = index * 4 * VERTEX_SIZE;
 		
-		Vector4f color = sprite.getColor();
+		Vector4f color = sprite.getColor().toNormVec4();
 		Vector2f[] textureCoords = sprite.getTextureCoords();
 		
 		int textureID = 0;

@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.theaemogie.timble.components.Component;
 import com.theaemogie.timble.components.SpriteRenderer;
 import com.theaemogie.timble.renderer.Renderer;
-import com.theaemogie.timble.tiles.SpriteSheet;
 import com.theaemogie.timble.timble.Camera;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Window;
@@ -30,19 +29,20 @@ public abstract class Scene {
 	protected transient Renderer renderer = new Renderer();
 	protected Camera camera = null;
 	protected List<GameObject> gameObjects = new ArrayList<>();
-	protected transient boolean levelLoaded;
+	protected transient boolean cameraLoaded = false;
 	private transient boolean isRunning = false;
 	private List<GameObject> tiles = new ArrayList<>();
+	protected int mapWidth, mapHeight;
+	protected int tileWidth, tileHeight;
 	
 	public Scene() {
 	}
 	
 	public void init(Window window) {
-		if (camera == null) {
+		if (!cameraLoaded) {
 			camera = new Camera();
 			camera.init(new Vector2f());
 		}
-		camera.init(camera.position);
 		camera.adjustProjection();
 	}
 	
@@ -93,6 +93,8 @@ public abstract class Scene {
 		}
 	}
 	
+	public void preFrame(Window window) {}
+	
 	public void update(Window window, double deltaTime) {
 		tiles.forEach(tile -> tile.update(window, deltaTime));
 		gameObjects.forEach(gameObject -> gameObject.update(window, deltaTime));
@@ -102,21 +104,37 @@ public abstract class Scene {
 		this.renderer.render(window);
 	}
 	
+	public void postFrame(Window window, double deltaTime) {}
+	
+	public void end(Window window) {
+		saveExit();
+	}
+	
 	public Camera getCamera() {
 		return camera;
 	}
 	
-	public List<GameObject> getGameObjects() {
-		return gameObjects;
-	}
-	
 	public GameObject getGameObject(int ID) {
 		Optional<GameObject> result = this.gameObjects.stream().filter(gameObject -> gameObject.getUUID() == ID).findFirst();
-		GameObject tileResult = this.tiles.stream().filter(tile -> tile.getUUID() == ID).findFirst().get();
-		return result.orElse(tileResult);
+		Optional<GameObject> tileResult = this.tiles.stream().filter(tile -> tile.getUUID() == ID).findFirst();
+		return result.orElse(tileResult.orElse(null));
 	}
 	
-	public void imGui(Window window) {}
+	public int getMapWidth() {
+		return mapWidth;
+	}
+	
+	public int getMapHeight() {
+		return mapHeight;
+	}
+	
+	public int getTileWidth() {
+		return tileWidth;
+	}
+	
+	public int getTileHeight() {
+		return tileHeight;
+	}
 	
 	//region GSON stuff.
 	
@@ -134,10 +152,6 @@ public abstract class Scene {
 			FileWriter cameraFile = new FileWriter(".run/camera.dat");
 			cameraFile.write(gson.toJson(this.camera));
 			cameraFile.close();
-			
-			FileWriter gameObjectsFile = new FileWriter(".run/gameObjects.dat");
-			gameObjectsFile.write(gson.toJson(this.gameObjects));
-			gameObjectsFile.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -147,41 +161,13 @@ public abstract class Scene {
 	//region Deserialization
 	public void load() {
 		String cameraFile = "";
-		String gameObjectsFile = "";
-		
 		try {
 			cameraFile = new String(Files.readAllBytes(Paths.get(".run/camera.dat")));
-			gameObjectsFile = new String(Files.readAllBytes(Paths.get(".run/gameObjects.dat")));
 		} catch (IOException ignored) {}
-		
 		if (!(cameraFile.equals("") || cameraFile.equals("{}"))) {
 			this.camera = gson.fromJson(cameraFile, Camera.class);
-		}
-		
-		if (!(gameObjectsFile.equals("") || gameObjectsFile.equals("[]"))) {
-			int maxGameObjectID = -1;
-			int maxComponentID = -1;
-			
-			
-			GameObject[] gameObjects = gson.fromJson(gameObjectsFile, GameObject[].class);
-			for (GameObject gameObject : gameObjects) {
-				addGameObjectToScene(gameObject);
-				
-				for (Component component : gameObject.getAllComponents()) {
-					if (component.getUUID() > maxComponentID) {
-						maxComponentID = component.getUUID();
-					}
-				}
-				if (gameObject.getUUID() > maxGameObjectID) {
-					maxGameObjectID = gameObject.getUUID();
-				}
-			}
-			
-			maxGameObjectID++;
-			maxComponentID++;
-			GameObject.init(maxGameObjectID);
-			Component.init(maxComponentID);
-			levelLoaded = true;
+			camera.init(camera.position);
+			cameraLoaded = true;
 		}
 	}
 	//endregion

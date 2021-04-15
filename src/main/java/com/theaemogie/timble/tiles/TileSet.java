@@ -22,7 +22,16 @@ public class TileSet {
 		gameObjects = new GameObject[dimWidth][dimHeight];
 		
 		for (int y = 0; y < dimHeight; y++) { for (int x = 0; x < dimWidth; x++) {
-			
+			int texPos = getAt(
+					map,
+					prevSize,
+					spriteSheet.getLayerID(),
+					x,
+					y,
+					dimWidth,
+					dimHeight
+			);
+			if (texPos == 0) continue;
 			//region Create GameObject.
 			gameObjects[x][y] = new GameObject(
 					"Tile " + x + ":" + y,
@@ -32,15 +41,7 @@ public class TileSet {
 					)
 			)
 					.addComponent(new SpriteRenderer().setSprite(
-							spriteSheet.getSprite(getAt(
-									map,
-									prevSize,
-									spriteSheet.getLayerID(),
-									x,
-									y,
-									dimWidth,
-									dimHeight
-							))
+							spriteSheet.getSprite(texPos)
 					));
 			//endregion
 			scene.addTilesToScene(gameObjects[x][y]);
@@ -54,7 +55,9 @@ public class TileSet {
 		if (index < 0) {
 			index = 0;
 		}
-		int output = map.get(layerID).get(index) - 1  - (totalSprites);
+		int output = map
+				.get(layerID)
+				.get(index) - 1  - (totalSprites);
 		return Math.max(output, 0);
 	}
 }

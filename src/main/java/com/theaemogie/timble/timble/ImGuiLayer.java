@@ -1,7 +1,7 @@
 package com.theaemogie.timble.timble;
 
 import com.theaemogie.timble.editor.GameViewWindow;
-import com.theaemogie.timble.editor.PickingTexture;
+import com.theaemogie.timble.tiles.PickingTexture;
 import com.theaemogie.timble.editor.PropertiesWindow;
 import com.theaemogie.timble.eventhandlers.KeyListener;
 import com.theaemogie.timble.eventhandlers.MouseListener;
@@ -141,7 +141,6 @@ public class ImGuiLayer {
     
     public void process(Window window, float deltaTime,Scene currentScene) {
         ImGui.showDemoWindow();
-        currentScene.imGui(window);
         propertiesWindow.update(window, deltaTime, currentScene);
         propertiesWindow.imGui();
         gameViewWindow.imGui(window);
@@ -181,7 +180,7 @@ public class ImGuiLayer {
         ImGui.dockSpace(ImGui.getID("DockSpace"));
     }
 
-    protected void disposeImGui() {
+    public void disposeImGui() {
         imGuiGlfw.dispose();
         imGuiGl3.dispose();
         ImGui.destroyContext();

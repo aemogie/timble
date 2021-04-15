@@ -20,6 +20,15 @@ public class Color {
 		this.b = b;
 		this.a = a;
 	}
+	public Color(float r, float g, float b, float a, boolean normalized) {
+		this(r, g, b, a);
+		if (normalized) {
+			this.r = fromMap(r);
+			this.g = fromMap(g);
+			this.b = fromMap(b);
+			this.a = fromMap(a);
+		}
+	}
 	
 	public Color(float r, float g, float b) {
 		this(r, g, b, 255);
@@ -105,6 +114,13 @@ public class Color {
 	
 	public void setColor(Vector3f in) {
 		this.setColor(in, false);
+	}
+	
+	public void setColor(Color color) {
+		this.r = color.r;
+		this.g = color.g;
+		this.b = color.b;
+		this.a = color.a;
 	}
 	
 	//endregion

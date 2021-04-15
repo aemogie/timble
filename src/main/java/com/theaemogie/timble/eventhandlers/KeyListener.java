@@ -30,7 +30,19 @@ public class KeyListener {
     public static boolean isKeyPressed(int key) {
         return keyPressed[key];
     }
-
+    
+    public static boolean isControlPressed() {
+        return isKeyPressed(GLFW_KEY_LEFT_CONTROL) || isKeyPressed(GLFW_KEY_RIGHT_CONTROL);
+    }
+    
+    public static boolean isShiftPressed() {
+        return isKeyPressed(GLFW_KEY_LEFT_SHIFT) || isKeyPressed(GLFW_KEY_RIGHT_SHIFT);
+    }
+    
+    public static boolean isAltPressed() {
+        return isKeyPressed(GLFW_KEY_LEFT_ALT) || isKeyPressed(GLFW_KEY_RIGHT_ALT);
+    }
+    
     public static void charCallback(long window, int character) {
         charInput = character;
     }

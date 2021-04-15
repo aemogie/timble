@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
  */
-public class GameObject implements Cloneable {
+public class GameObject {
 	
 	private static int ID_COUNTER = 0;
 	public Transform transform;
@@ -81,6 +81,7 @@ public class GameObject implements Cloneable {
 		}
 	}
 	
+	@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 	@Override
 	public String toString() {
 		StringBuilder outputString = new StringBuilder("Class: " + this.getClass().getCanonicalName() + "\n");
@@ -96,10 +97,6 @@ public class GameObject implements Cloneable {
 	
 	public List<Component> getAllComponents() {
 		return this.components;
-	}
-	
-	public GameObject clone() throws CloneNotSupportedException {
-		return (GameObject) super.clone();
 	}
 	
 	public String getName() {

@@ -32,33 +32,33 @@ public class LevelEditorScene extends Scene {
 	public void init(Window window) {
 		super.init(window);
 		if (levelEditorComponents == null) {
-			levelEditorComponents = new GameObject("Level Editor Components", new Transform());
-			levelEditorComponents.addComponent(new MouseControls());
-			levelEditorComponents.addComponent(new GridLines());
-			levelEditorComponents.addComponent(new EditorCamera());
+			levelEditorComponents = new GameObject("Level Editor Components", new Transform())
+					.addComponent(new MouseControls())
+					.addComponent(new GridLines())
+					.addComponent(new EditorCamera());
 		}
 		levelEditorComponents.getComponent(EditorCamera.class).init(this.camera);
 		
 		loadResources();
-		SpriteSheet landscapeSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/tilemap/landscapes.png");
+		SpriteSheet landscapeSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/landscapes.png");
 		landscapeSpriteSheet.setLayerID(0);
-		SpriteSheet decorSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/tilemap/manmade.png");
+		SpriteSheet decorSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/manmade.png");
 		decorSpriteSheet.setLayerID(1);
-		SpriteSheet natureSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/tilemap/nature.png");
+		SpriteSheet natureSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/nature.png");
 		natureSpriteSheet.setLayerID(2);
 		
-		new TileSet("src/main/resources/assets/tilemap/map.json", landscapeSpriteSheet, 100, 100, 32, 32, this);
-		new TileSet("src/main/resources/assets/tilemap/map.json", decorSpriteSheet, 100, 100, 32, 32, this);
-		new TileSet("src/main/resources/assets/tilemap/map.json", natureSpriteSheet, 100, 100, 32, 32, this);
+		new TileSet("src/main/resources/assets/textures/tilemap/map.json", landscapeSpriteSheet, 100, 100, 32, 32, this);
+		new TileSet("src/main/resources/assets/textures/tilemap/map.json", decorSpriteSheet, 100, 100, 32, 32, this);
+		new TileSet("src/main/resources/assets/textures/tilemap/map.json", natureSpriteSheet, 100, 100, 32, 32, this);
 	}
 	
 	@Override
 	protected void loadResources() {
 		//region Landscapes SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/tilemap/landscapes.png",
+				"src/main/resources/assets/textures/tilemap/landscapes.png",
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/tilemap/landscapes.png"),
+						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/landscapes.png"),
 						16,
 						16,
 						256,
@@ -68,9 +68,9 @@ public class LevelEditorScene extends Scene {
 		//endregion
 		//region Decor SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/tilemap/manmade.png",
+				"src/main/resources/assets/textures/tilemap/manmade.png",
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/tilemap/manmade.png"),
+						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/manmade.png"),
 						16,
 						16,
 						64,
@@ -80,9 +80,9 @@ public class LevelEditorScene extends Scene {
 		//endregion
 		//region Nature SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/tilemap/nature.png",
+				"src/main/resources/assets/textures/tilemap/nature.png",
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/tilemap/nature.png"),
+						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/nature.png"),
 						16,
 						16,
 						64,
@@ -94,6 +94,11 @@ public class LevelEditorScene extends Scene {
 	}
 	
 	@Override
+	public void preFrame(Window window) {
+		window.getFrameBuffer().bind();
+	}
+	
+	@Override
 	public void update(Window window, double deltaTime) {
 		levelEditorComponents.update(window, deltaTime);
 		super.update(window, deltaTime);
@@ -102,6 +107,18 @@ public class LevelEditorScene extends Scene {
 	@Override
 	public void render(Window window) {
 		this.renderer.render(window);
+	}
+	
+	@Override
+	public void postFrame(Window window, double deltaTime) {
+		window.getFrameBuffer().unbind();
+		window.imGuiLayer.update(window, (float) deltaTime, this);
+	}
+	
+	@Override
+	public void end(Window window) {
+		window.imGuiLayer.disposeImGui();
+		super.end(window);
 	}
 	
 	@Override
@@ -118,6 +135,7 @@ public class LevelEditorScene extends Scene {
 	
 	@Override
 	public void load() {
+		super.load();
 		String editorComponentsFile = "";
 		try {
 			editorComponentsFile = new String(Files.readAllBytes(Paths.get(".run/editorComponents.dat")));

@@ -24,10 +24,10 @@ public class SpriteSheet {
         int currentY = texture.getHeight() - spriteHeight;
 
         for (int i = 0; i < numOfSprites; i++) {
-            float topY = 1f - (currentY + spriteHeight) / (float) texture.getHeight();
+            float topY = (currentY + spriteHeight) / (float) texture.getHeight();
             float rightX = (currentX + spriteWidth) / (float) texture.getWidth();
             float leftX = currentX / (float) texture.getWidth();
-            float bottomY = 1f - currentY / (float) texture.getHeight();
+            float bottomY = currentY / (float) texture.getHeight();
 
             Vector2f[] textureCoords = {
                     new Vector2f(rightX, topY),

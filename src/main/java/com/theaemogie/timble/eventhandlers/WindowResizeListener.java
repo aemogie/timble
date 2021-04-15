@@ -16,8 +16,8 @@ public class WindowResizeListener {
 		
 		Vector2i aspectSize = TimbleMath.generateXnYFromRatio(window, screenWidth, screenHeight);
 		
-		int vpX = (int) (((float) screenWidth / 2f) - ((float) aspectSize.x / 2f));
-		int vpY = (int) (((float) screenHeight / 2f) - ((float) aspectSize.y / 2f));
+		int vpX = (int) ((screenWidth / 2) - (aspectSize.x / 2));
+		int vpY = (int) ((screenHeight / 2) - (aspectSize.y / 2));
 		
 		glViewport(vpX, vpY, aspectSize.x, aspectSize.y);
 	}

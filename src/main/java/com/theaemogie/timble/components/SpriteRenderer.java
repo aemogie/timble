@@ -1,5 +1,6 @@
 package com.theaemogie.timble.components;
 
+import com.theaemogie.timble.renderer.Color;
 import com.theaemogie.timble.renderer.Sprite;
 import com.theaemogie.timble.renderer.Texture;
 import com.theaemogie.timble.timble.Transform;
@@ -13,7 +14,7 @@ import org.joml.Vector4f;
  */
 public class SpriteRenderer extends Component {
 	
-	private Vector4f color = new Vector4f(1, 1, 1, 1);
+	private Color color = new Color(255);
 	private Sprite sprite = new Sprite();
 	
 	private transient Transform lastTransform;
@@ -45,21 +46,21 @@ public class SpriteRenderer extends Component {
 	@Override
 	public void imGui() {
 		if (ImGui.collapsingHeader("Color Picker")) {
+			Vector4f color = this.color.toNormVec4();
 			float[] imColor = {color.x, color.y, color.z, color.w};
 			if (ImGui.colorPicker4("", imColor)) {
-				this.color.set(imColor[0], imColor[1], imColor[2], imColor[3]);
-				this.isDirty = true;
+				this.setColor(new Color(imColor[0], imColor[1], imColor[2], imColor[3], true));
 			}
 		}
 	}
 	
-	public Vector4f getColor() {
+	public Color getColor() {
 		return color;
 	}
 	
-	public void setColor(Vector4f color) {
+	public void setColor(Color color) {
 		if (!this.color.equals(color)) {
-			this.color.set(color);
+			this.color.setColor(color);
 			this.isDirty = true;
 		}
 	}
@@ -68,8 +69,9 @@ public class SpriteRenderer extends Component {
 		return sprite.getTexture();
 	}
 	
-	public void setTexture(Texture texture) {
+	public SpriteRenderer setTexture(Texture texture) {
 		this.sprite.setTexture(texture);
+		return this;
 	}
 	
 	public Vector2f[] getTextureCoords() {
