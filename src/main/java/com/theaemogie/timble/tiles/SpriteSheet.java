@@ -14,7 +14,6 @@ public class SpriteSheet {
 
     private Texture texture;
     private List<Sprite> sprites;
-    private int layerID = -1;
 
     public SpriteSheet(Texture texture, int spriteWidth, int spriteHeight, int numOfSprites, int spacing) {
         this.sprites = new ArrayList<>();
@@ -69,14 +68,6 @@ public class SpriteSheet {
 
     public int size() {
         return this.sprites.size();
-    }
-    
-    public int getLayerID() {
-        return layerID;
-    }
-    
-    public void setLayerID(int layerID) {
-        this.layerID = layerID;
     }
     
     @Override

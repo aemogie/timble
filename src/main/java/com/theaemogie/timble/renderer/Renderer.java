@@ -48,6 +48,15 @@ public class Renderer {
         }
     }
     
+    public void remove(GameObject gameObject) {
+        SpriteRenderer spriteRenderer = gameObject.getComponent(SpriteRenderer.class);
+        if (spriteRenderer != null) {
+            for (RenderBatch batch : batches) {
+                batch.removeSprite(spriteRenderer);
+            }
+        }
+    }
+    
     public static void bindShader(Shader shader) {
         currentShader = shader;
     }

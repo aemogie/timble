@@ -4,6 +4,7 @@ import com.theaemogie.timble.components.SpriteRenderer;
 import com.theaemogie.timble.timble.Window;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.GL20;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +53,7 @@ public class RenderBatch {
 	private final int VERTEX_SIZE = 2 + 4 + 2 + 1 + 1;
 	private final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
 	
-	private SpriteRenderer[] sprites;
-	private int numSprites;
+	private ArrayList<SpriteRenderer> sprites;
 	private boolean hasRoom;
 	
 	private float[] vertices;
@@ -65,13 +65,13 @@ public class RenderBatch {
 	//endregion
 	
 	public RenderBatch(int maxBatchSize) {
-		this.sprites = new SpriteRenderer[maxBatchSize];
+		this.sprites = new ArrayList<>();
 		this.maxBatchSize = maxBatchSize;
 		
 		// 4 vertices quads
 		vertices = new float[maxBatchSize * 4 * VERTEX_SIZE];
 		
-		this.numSprites = 0;
+//		this.numSprites = 0;
 		this.hasRoom = true;
 		
 		this.textures = new ArrayList<>();
@@ -145,8 +145,8 @@ public class RenderBatch {
 		
 		//region Check if any sprites are dirty. If yes, reload and rebuffer.
 		boolean rebufferData = false;
-		for (int i = 0; i < numSprites; i++) {
-			SpriteRenderer sprite = sprites[i];
+		for (int i = 0; i < sprites.size(); i++) {
+			SpriteRenderer sprite = sprites.get(i);
 			if (sprite.isDirty()) {
 				loadVertexProperties(i);
 				sprite.setClean();
@@ -159,7 +159,6 @@ public class RenderBatch {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
 		}
 		//endregion
-		
 		//region Use shader.
 		Shader shader = Renderer.getBoundShader();
 		shader.uploadMat4f("uProjection", window.getCurrentScene().getCamera().getProjectionMatrix());
@@ -178,7 +177,7 @@ public class RenderBatch {
 		//endregion
 		
 		//region Draw everything.
-		glDrawElements(GL_TRIANGLES, this.numSprites * 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, this.sprites.size() * 6, GL_UNSIGNED_INT, 0);
 		//endregion
 		
 		//region Unbind and disable everything.
@@ -195,9 +194,7 @@ public class RenderBatch {
 	
 	public void addSprite(SpriteRenderer sprite) {
 		//region Get index and add renderObject.
-		int index = this.numSprites;
-		this.sprites[index] = sprite;
-		this.numSprites++;
+		this.sprites.add(sprite);
 		
 		if (sprite.getTexture() != null) {
 			if (!textures.contains(sprite.getTexture())) {
@@ -206,16 +203,20 @@ public class RenderBatch {
 		}
 		
 		//region Add properties to local vertex array.
-		loadVertexProperties(index);
+		loadVertexProperties(this.sprites.size() - 1);
 		//endregion
 		
-		if (numSprites >= this.maxBatchSize) {
-			this.hasRoom = false;
-		}
+		if (this.sprites.size() >= this.maxBatchSize) this.hasRoom = false;
+		
+	}
+	
+	public void removeSprite(SpriteRenderer sprite) {
+		this.sprites.remove(sprite);
+		if (this.sprites.size() < this.maxBatchSize) this.hasRoom = true;
 	}
 	
 	private void loadVertexProperties(int index) {
-		SpriteRenderer sprite = this.sprites[index];
+		SpriteRenderer sprite = this.sprites.get(index);
 		
 		// Find offset within array (4 vertices per sprite)
 		int offset = index * 4 * VERTEX_SIZE;

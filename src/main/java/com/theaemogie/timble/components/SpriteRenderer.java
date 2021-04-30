@@ -58,11 +58,12 @@ public class SpriteRenderer extends Component {
 		return color;
 	}
 	
-	public void setColor(Color color) {
+	public SpriteRenderer setColor(Color color) {
 		if (!this.color.equals(color)) {
 			this.color.setColor(color);
 			this.isDirty = true;
 		}
+		return this;
 	}
 	
 	public Texture getTexture() {
