@@ -1,6 +1,5 @@
 package com.theaemogie.timble.timble;
 
-import com.theaemogie.timble.scenes.Scene;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;

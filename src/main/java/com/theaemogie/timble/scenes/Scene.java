@@ -30,12 +30,16 @@ public abstract class Scene {
 	protected Camera camera = null;
 	protected List<GameObject> gameObjects = new ArrayList<>();
 	protected transient boolean cameraLoaded = false;
+	protected final int mapWidth, mapHeight;
+	protected final int tileWidth, tileHeight;
 	private transient boolean isRunning = false;
-	private List<GameObject> tiles = new ArrayList<>();
-	protected int mapWidth, mapHeight;
-	protected int tileWidth, tileHeight;
+	private final List<GameObject> tiles = new ArrayList<>();
 	
-	public Scene() {
+	public Scene(int mapWidth, int mapHeight, int tileWidth, int tileHeight) {
+		this.mapWidth = mapWidth;
+		this.mapHeight = mapHeight;
+		this.tileWidth = tileWidth;
+		this.tileHeight = tileHeight;
 	}
 	
 	public void init(Window window) {
@@ -44,6 +48,7 @@ public abstract class Scene {
 			camera.init(new Vector2f());
 		}
 		camera.adjustProjection();
+		loadResources();
 	}
 	
 	public void start() {
@@ -72,6 +77,11 @@ public abstract class Scene {
 			gameObject.start();
 			this.renderer.add(gameObject);
 		}
+	}
+	
+	public void removeGameObjectFromScene(GameObject gameObject) {
+		gameObjects.remove(gameObject);
+		this.renderer.remove(gameObject);
 	}
 	
 	protected void loadResources() {

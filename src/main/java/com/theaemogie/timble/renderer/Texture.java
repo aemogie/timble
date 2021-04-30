@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30C.glGenerateMipmap;
 import static org.lwjgl.stb.STBImage.*;
 
 /**
@@ -70,7 +71,7 @@ public class Texture {
 		} else {
 			assert false : "Error: (Texture) Could not load image '" + filepath + "'!";
 		}
-		
+		glGenerateMipmap(GL_TEXTURE_2D);
 		stbi_image_free(image);
 	}
 	

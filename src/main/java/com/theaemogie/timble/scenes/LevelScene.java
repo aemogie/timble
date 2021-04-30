@@ -11,6 +11,7 @@ import com.theaemogie.timble.timble.Window;
 import com.theaemogie.timble.util.AssetPool;
 import org.joml.Vector2f;
 
+import static com.theaemogie.timble.util.StringUtils.resourcePath;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -18,39 +19,42 @@ import static org.lwjgl.glfw.GLFW.*;
  */
 public class LevelScene extends Scene {
 	
+	GameObject player;
+	
 	public LevelScene() {
-		mapWidth = 100;
-		mapHeight = 100;
-		tileWidth = 32;
-		tileHeight = 32;
+		super(
+				100,
+				100,
+				32,
+				32
+		);
 	}
 	
 	@Override
 	public void init(Window window) {
 		super.init(window);
-		loadResources();
-		//region Landscapes SpriteSheet.
-		SpriteSheet landscapeSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/landscapes.png");
-		landscapeSpriteSheet.setLayerID(0);
+		//region Biomes SpriteSheet.
+		SpriteSheet biomesSpriteSheet = AssetPool.getSpriteSheet(resourcePath("tilemap/biomes.png"));
+		//endregion
+		//region Terrain SpriteSheet.
+		SpriteSheet terrainSpriteSheet = AssetPool.getSpriteSheet(resourcePath("tilemap/terrain.png"));
 		//endregion
 		//region Decor SpriteSheet.
-		SpriteSheet decorSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/manmade.png");
-		decorSpriteSheet.setLayerID(1);
+		SpriteSheet decorSpriteSheet = AssetPool.getSpriteSheet(resourcePath("tilemap/manmade.png"));
 		//endregion
 		//region Nature SpriteSheet.
-		SpriteSheet natureSpriteSheet = AssetPool.getSpriteSheet("src/main/resources/assets/textures/tilemap/nature.png");
-		natureSpriteSheet.setLayerID(2);
+		SpriteSheet natureSpriteSheet = AssetPool.getSpriteSheet(resourcePath("tilemap/nature.png"));
 		//endregion
-		
 		//region Map.
-		new TileSet("src/main/resources/assets/textures/tilemap/map.json", landscapeSpriteSheet, mapWidth, mapHeight, 32, 32, this);
-		new TileSet("src/main/resources/assets/textures/tilemap/map.json", decorSpriteSheet, mapWidth, mapHeight, 32, 32, this);
-		new TileSet("src/main/resources/assets/textures/tilemap/map.json", natureSpriteSheet, mapWidth, mapHeight, 32, 32, this);
+//		new TileSet(resourcePath("tilemap/map.json"), biomesSpriteSheet, mapWidth, mapHeight, 32, 32, this);
+//		new TileSet(resourcePath("tilemap/map.json"), terrainSpriteSheet, mapWidth, mapHeight, 32, 32, this);
+//		new TileSet(resourcePath("tilemap/map.json"), decorSpriteSheet, mapWidth, mapHeight, 32, 32, this);
+		new TileSet(resourcePath("tilemap/map.json"), 32, 32, this);
 		//endregion
 		
 		//region Player.
-		GameObject player = new GameObject("Player", new Transform(new Vector2f(mapWidth * tileWidth - tileWidth, 0), new Vector2f(32, 32)));
-		player.addComponent(new SpriteRenderer().setSprite(AssetPool.getSpriteSheet("src/main/resources/assets/textures/sprites/sprite1_spritesheet.png").getSprite(4)));
+		player = new GameObject("Player", new Transform(new Vector2f(0, 0), new Vector2f(32, 32)));
+		player.addComponent(new SpriteRenderer().setSprite(AssetPool.getSpriteSheet(resourcePath("sprites/sprite1_spritesheet.png")).getSprite(4)));
 		player.addComponent(new MovementController().setScene(this));
 		addGameObjectToScene(player);
 		//endregion
@@ -58,11 +62,23 @@ public class LevelScene extends Scene {
 	
 	@Override
 	protected void loadResources() {
-		//region Landscapes SpriteSheet.
+		//region Biomes SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/textures/tilemap/landscapes.png",
+				resourcePath("tilemap/biomes.png"),
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/landscapes.png"),
+						AssetPool.getTexture(resourcePath("tilemap/biomes.png")),
+						16,
+						16,
+						4,
+						0
+				)
+		);
+		//endregion
+		// region Terrain SpriteSheet.
+		AssetPool.addSpriteSheet(
+				resourcePath("tilemap/terrain.png"),
+				new SpriteSheet(
+						AssetPool.getTexture(resourcePath("tilemap/terrain.png")),
 						16,
 						16,
 						256,
@@ -72,9 +88,9 @@ public class LevelScene extends Scene {
 		//endregion
 		//region Decor SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/textures/tilemap/manmade.png",
+				resourcePath("tilemap/manmade.png"),
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/manmade.png"),
+						AssetPool.getTexture(resourcePath("tilemap/manmade.png")),
 						16,
 						16,
 						64,
@@ -84,9 +100,9 @@ public class LevelScene extends Scene {
 		//endregion
 		//region Nature SpriteSheet.
 		AssetPool.addSpriteSheet(
-				"src/main/resources/assets/textures/tilemap/nature.png",
+				resourcePath("tilemap/nature.png"),
 				new SpriteSheet(
-						AssetPool.getTexture("src/main/resources/assets/textures/tilemap/nature.png"),
+						AssetPool.getTexture(resourcePath("tilemap/nature.png")),
 						16,
 						16,
 						64,
@@ -94,8 +110,18 @@ public class LevelScene extends Scene {
 				)
 		);
 		//endregion
-		AssetPool.addSpriteSheet("src/main/resources/assets/textures/sprites/sprite1_spritesheet.png", new SpriteSheet(AssetPool.getTexture("src/main/resources/assets/textures/sprites/sprite1_spritesheet.png"), 16, 16, 16, 0));
+		AssetPool.addSpriteSheet(
+				resourcePath("sprites/sprite1_spritesheet.png"),
+				new SpriteSheet(
+						AssetPool.getTexture(resourcePath("sprites/sprite1_spritesheet.png")),
+						16,
+						16,
+						16,
+						0
+				)
+		);
 		super.loadResources();
+		
 	}
 	
 	float clickDebounce = 1f;
@@ -105,6 +131,9 @@ public class LevelScene extends Scene {
 	public void update(Window window, double deltaTime) {
 		super.update(window, deltaTime);
 		zoom((float) deltaTime);
+		if (KeyListener.isKeyPressed(GLFW_KEY_G)) {
+			removeGameObjectFromScene(player);
+		}
 	}
 	
 	private void zoom(float deltaTime) {

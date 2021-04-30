@@ -18,6 +18,7 @@ import org.lwjgl.opengl.GL;
 
 import java.util.Objects;
 
+import static com.theaemogie.timble.util.StringUtils.resourcePath;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -41,23 +42,11 @@ public class Window {
 	private FrameBuffer frameBuffer;
 	private PickingTexture pickingTexture;
 	
-	//region Constructors.
-	private Window(String title) {
-		this(title, 1366, 768);
-	}
-	
-	private Window(String title, int width, int height) {
-		this(title, width, height, new Vector3f(0.2f, 0.2f, 0.2f));
-	}
-	
-	private Window(String title, int width, int height, Vector3f color) {
-		this(title, width, height, color, true);
-	}
-	
-	private Window(String title, int width, int height, Vector3f color, boolean vsync) {
-		this.width = width;
-		this.height = height;
+	//region Constructor.
+	private Window(String title, Vector3f color, boolean vsync) {
 		this.title = title;
+		this.width = videoMode.width();
+		this.height = videoMode.height();
 		this.r = color.x;
 		this.g = color.y;
 		this.b = color.z;
@@ -66,43 +55,19 @@ public class Window {
 	//endregion
 	
 	//region Create windows.
+	
 	public static Window create(String title) {
-		GLFWErrorCallback.createPrint(System.err).set();
-		
-		if (!glfwInit()) {
-			throw new IllegalStateException("Unable to initialize GLFW!");
-		}
-		return new Window(title);
+		return create(title, new Vector3f(0.2f,0.2f,0.2f));
 	}
 	
-	public static Window create(String title, int width, int height) {
-		GLFWErrorCallback.createPrint(System.err).set();
-		
-		if (!glfwInit()) {
-			throw new IllegalStateException("Unable to initialize GLFW!");
-		}
-		
-		return new Window(title, width, height);
+	public static Window create(String title, Vector3f color) {
+		return create(title, color, true);
 	}
 	
-	public static Window create(String title, int width, int height, Vector3f color) {
+	public static Window create(String title, Vector3f color, boolean vsync) {
 		GLFWErrorCallback.createPrint(System.err).set();
-		
-		if (!glfwInit()) {
-			throw new IllegalStateException("Unable to initialize GLFW!");
-		}
-		
-		return new Window(title, width, height, color);
-	}
-	
-	public static Window create(String title, int width, int height, Vector3f color, boolean vsync) {
-		GLFWErrorCallback.createPrint(System.err).set();
-		
-		if (!glfwInit()) {
-			throw new IllegalStateException("Unable to initialize GLFW!");
-		}
-		
-		return new Window(title, width, height, color, vsync);
+		if (!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW!");
+		return new Window(title, color, vsync);
 	}
 	//endregion
 	
@@ -158,9 +123,6 @@ public class Window {
 		// Set resize callback after we make the current context.
 		glfwSetWindowSizeCallback(glfwWindow, (window, width, height) -> WindowResizeListener.resizeCallback(this, width, height));
 		
-		this.width = videoMode.width();
-		this.height = videoMode.height();
-		
 		Window.this.changeScene(scene);
 		
 		this.frameBuffer = new FrameBuffer(width, height);
@@ -180,8 +142,8 @@ public class Window {
 		double endTime;
 		double deltaTime = -1.0;
 		
-		Shader defaultShader = AssetPool.getShader("src/main/resources/assets/shaders/Default.glsl");
-		Shader pickingShader = AssetPool.getShader("src/main/resources/assets/shaders/Picking.glsl");
+		Shader defaultShader = AssetPool.getShader(resourcePath("shaders/Default.glsl"));
+		Shader pickingShader = AssetPool.getShader(resourcePath("shaders/Picking.glsl"));
 		
 		while (!glfwWindowShouldClose(glfwWindow)) {
 			

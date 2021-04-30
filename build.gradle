@@ -67,7 +67,24 @@ dependencies {
     implementation "org.joml:joml:${jomlVersion}"
     //endregion
 }
-def cleanRuns = tasks.register("cleanRuns"){
-    delete fileTree(".run").include("**/*.dat")
-    group = "runs"
+//def cleanRuns = tasks.register("cleanRuns"){
+//    delete fileTree(".run").include("**/*.dat")
+//    group = "runs"
+//}
+
+jar {
+    manifest {
+        attributes("Manifest-Version": "1.0",
+                "Main-Class": "com.theaemogie.timble.Main");
+    }
+}
+
+task fatJar(type: Jar) {
+    manifest.from jar.manifest
+    classifier = 'all'
+    processResources.exclude("*")
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
 }

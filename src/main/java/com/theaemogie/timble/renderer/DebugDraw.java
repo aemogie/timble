@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.theaemogie.timble.util.StringUtils.resourcePath;
 import static org.lwjgl.opengl.GL30.*;
 
 /**
@@ -22,7 +23,7 @@ public class DebugDraw {
     private static List<Line> lines = new ArrayList<>();
     //7 floats per vertex. 2 vertices per line.
     private static float[] vertexArray = new float[MAX_LINES * 7 * 2];
-    private static Shader shader = AssetPool.getShader("src/main/resources/assets/shaders/Debug.glsl");
+    private static Shader shader = AssetPool.getShader(resourcePath("shaders/Debug.glsl"));
 
     private static int vaoID, vboID;
 

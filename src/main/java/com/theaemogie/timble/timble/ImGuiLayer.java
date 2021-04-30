@@ -17,6 +17,7 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
 import org.lwjgl.glfw.GLFW;
 
+import static com.theaemogie.timble.util.StringUtils.resourcePath;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -115,7 +116,7 @@ public class ImGuiLayer {
         fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesDefault());
 
         fontConfig.setPixelSnapH(true);
-        fontAtlas.addFontFromFileTTF("src/main/resources/assets/fonts/8bit-8px.ttf", 10, fontConfig);
+        fontAtlas.addFontFromFileTTF(resourcePath("fonts/8bit-8px.ttf"), 10, fontConfig);
 
         fontConfig.destroy();
 
@@ -123,7 +124,7 @@ public class ImGuiLayer {
     }
     
     public void update(Window window, float deltaTime, Scene currentScene) {
-        startFrame(deltaTime);
+        startFrame();
 
         // Any Dear ImGui code SHOULD go between ImGui.newFrame()/ImGui.render() methods
         ImGui.newFrame();
@@ -135,7 +136,7 @@ public class ImGuiLayer {
         endFrame();
     }
     
-    private void startFrame(final float deltaTime) {
+    private void startFrame() {
         imGuiGlfw.newFrame();
     }
     
