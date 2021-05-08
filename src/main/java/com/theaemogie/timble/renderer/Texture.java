@@ -4,6 +4,8 @@ import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30C.glGenerateMipmap;
@@ -14,7 +16,7 @@ import static org.lwjgl.stb.STBImage.*;
  */
 public class Texture {
 	
-	private String filepath;
+	private Path filepath;
 	private transient int textureID;
 	private int width, height;
 	
@@ -25,7 +27,7 @@ public class Texture {
 	}
 	
 	public Texture(int width, int height) {
-		this.filepath = "Generated";
+		this.filepath = Paths.get("Generated");
 		
 		textureID = glGenTextures();
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -37,7 +39,7 @@ public class Texture {
 		
 	}
 	
-	public void init(String filepath) {
+	public void init(Path filepath) {
 		this.filepath = filepath;
 		
 		textureID = glGenTextures();
@@ -57,7 +59,7 @@ public class Texture {
 		IntBuffer channels = BufferUtils.createIntBuffer(1);
 
         stbi_set_flip_vertically_on_load(true);
-		ByteBuffer image = stbi_load(filepath, width, height, channels, 0);
+		ByteBuffer image = stbi_load(filepath.toAbsolutePath().toString(), width, height, channels, 0);
 		
 		//
 		if (image != null) {
@@ -95,7 +97,7 @@ public class Texture {
 		return textureID;
 	}
 	
-	public String getFilepath() {
+	public Path getFilepath() {
 		return filepath;
 	}
 	
@@ -108,10 +110,11 @@ public class Texture {
 		return objTex.getWidth() == this.width && objTex.getHeight() == this.height && objTex.getTextureID() == this.textureID && objTex.getFilepath().equals(this.filepath);
 	}
 	
+	@SuppressWarnings({"StringConcatenationInsideStringBufferAppend", "StringBufferReplaceableByString"})
 	@Override
 	public String toString() {
 		StringBuilder outputString = new StringBuilder("Class: " + this.getClass().getCanonicalName() + "\n");
-		outputString.append("Path: " + this.filepath + "\n");
+		outputString.append("Path: " + this.filepath.toAbsolutePath() + "\n");
 		return outputString.toString();
 	}
 }

@@ -49,6 +49,7 @@ public class Renderer {
     }
     
     public void remove(GameObject gameObject) {
+        if (gameObject == null) return;
         SpriteRenderer spriteRenderer = gameObject.getComponent(SpriteRenderer.class);
         if (spriteRenderer != null) {
             for (RenderBatch batch : batches) {

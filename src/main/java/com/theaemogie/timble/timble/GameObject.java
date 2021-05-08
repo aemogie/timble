@@ -1,8 +1,6 @@
 package com.theaemogie.timble.timble;
 
 import com.theaemogie.timble.components.Component;
-import com.theaemogie.timble.components.SpriteRenderer;
-import com.theaemogie.timble.renderer.Sprite;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +11,13 @@ import java.util.List;
 public class GameObject {
 	
 	private static int ID_COUNTER = 0;
+	private final int UUID;
+	private final String name;
+	private final List<Component> components = new ArrayList<>();
 	public Transform transform;
-	private int UUID = -1;
-	private String name;
-	private List<Component> components;
 	
 	public GameObject(String name, Transform transform) {
 		this.name = name;
-		this.components = new ArrayList<>();
 		this.transform = transform;
 		
 		this.UUID = ID_COUNTER++;
@@ -53,6 +50,8 @@ public class GameObject {
 			}
 		}
 	}
+
+//    private boolean firstTime = true;
 	
 	public GameObject addComponent(Component c) {
 		c.generateID();
@@ -60,8 +59,6 @@ public class GameObject {
 		c.gameObject = this;
 		return this;
 	}
-
-//    private boolean firstTime = true;
 	
 	public void update(Window window, double deltaTime) {
 		for (Component component : components) {
@@ -101,15 +98,5 @@ public class GameObject {
 	
 	public String getName() {
 		return name;
-	}
-	
-	public GameObject gameObjectGen(Sprite sprite, Component... components) {
-		SpriteRenderer characterSpriteRenderer = new SpriteRenderer();
-		characterSpriteRenderer.setSprite(sprite);
-		this.addComponent(characterSpriteRenderer);
-		for (Component component : components) {
-			this.addComponent(component);
-		}
-		return this;
 	}
 }

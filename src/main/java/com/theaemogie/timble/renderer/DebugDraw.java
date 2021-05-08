@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.theaemogie.timble.util.Settings.MAX_LINES;
 import static com.theaemogie.timble.util.StringUtils.resourcePath;
 import static org.lwjgl.opengl.GL30.*;
 
@@ -19,7 +20,7 @@ import static org.lwjgl.opengl.GL30.*;
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
  */
 public class DebugDraw {
-    private static final int MAX_LINES = 500;
+    
     private static List<Line> lines = new ArrayList<>();
     //7 floats per vertex. 2 vertices per line.
     private static float[] vertexArray = new float[MAX_LINES * 7 * 2];

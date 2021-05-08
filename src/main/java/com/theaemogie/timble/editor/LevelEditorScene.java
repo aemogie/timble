@@ -4,12 +4,12 @@ import com.theaemogie.timble.components.EditorCamera;
 import com.theaemogie.timble.components.GridLines;
 import com.theaemogie.timble.components.MouseControls;
 import com.theaemogie.timble.scenes.Scene;
-import com.theaemogie.timble.tiles.SpriteSheet;
-import com.theaemogie.timble.tiles.TileSet;
+import com.theaemogie.timble.tiles.TiledMap;
+import com.theaemogie.timble.timble.Camera;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Transform;
 import com.theaemogie.timble.timble.Window;
-import com.theaemogie.timble.util.AssetPool;
+import org.joml.Vector2i;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class LevelEditorScene extends Scene {
 	private GameObject levelEditorComponents = null;
 	
 	public LevelEditorScene() {
-		super(100, 100, 32, 32);
+		super(new Vector2i(32, 32));
 	}
 	
 	@Override
@@ -40,77 +40,14 @@ public class LevelEditorScene extends Scene {
 		}
 		
 		levelEditorComponents.getComponent(EditorCamera.class).init(this.camera);
-		//region Biomes SpriteSheet.
-		SpriteSheet biomesSpriteSheet = AssetPool.getSpriteSheet(resourcePath("tilemap/biomes.png"));
-		//endregion
-		//region Terrain SpriteSheet.
-		SpriteSheet terrainSpriteSheet = AssetPool.getSpriteSheet(resourcePath("tilemap/terrain.png"));
-		//endregion
-		//region Decor SpriteSheet.
-		SpriteSheet decorSpriteSheet = AssetPool.getSpriteSheet(resourcePath("tilemap/manmade.png"));
-		//endregion
-		//region Nature SpriteSheet.
-		SpriteSheet natureSpriteSheet = AssetPool.getSpriteSheet(resourcePath("tilemap/nature.png"));
-		//endregion
 		
 		//region Map.
-//		new TileSet(resourcePath("tilemap/map.json"), biomesSpriteSheet, mapWidth, mapHeight, 32, 32, this);
-		new TileSet(resourcePath("tilemap/map.json"), 32, 32, this);
-//		new TileSet(resourcePath("tilemap/map.json"), decorSpriteSheet, 32, 32, this);
-//		new TileSet(resourcePath("tilemap/map.json"), natureSpriteSheet, 32, 32, this);
+		new TiledMap(resourcePath("tilemap/map.json"), 32, 32, this);
 		//endregion
 	}
 	
 	@Override
 	protected void loadResources() {
-		//region Biomes SpriteSheet.
-		AssetPool.addSpriteSheet(
-				resourcePath("tilemap/biomes.png"),
-				new SpriteSheet(
-						AssetPool.getTexture(resourcePath("tilemap/biomes.png")),
-						16,
-						16,
-						4,
-						0
-				)
-		);
-		//endregion
-		// region Terrain SpriteSheet.
-		AssetPool.addSpriteSheet(
-				resourcePath("tilemap/terrain.png"),
-				new SpriteSheet(
-						AssetPool.getTexture(resourcePath("tilemap/terrain.png")),
-						16,
-						16,
-						256,
-						0
-				)
-		);
-		//endregion
-		//region Decor SpriteSheet.
-		AssetPool.addSpriteSheet(
-				resourcePath("tilemap/manmade.png"),
-				new SpriteSheet(
-						AssetPool.getTexture(resourcePath("tilemap/manmade.png")),
-						16,
-						16,
-						64,
-						0
-				)
-		);
-		//endregion
-		//region Nature SpriteSheet.
-		AssetPool.addSpriteSheet(
-				resourcePath("tilemap/nature.png"),
-				new SpriteSheet(
-						AssetPool.getTexture(resourcePath("tilemap/nature.png")),
-						16,
-						16,
-						64,
-						0
-				)
-		);
-		//endregion
 		super.loadResources();
 	}
 	
@@ -139,7 +76,6 @@ public class LevelEditorScene extends Scene {
 	
 	@Override
 	public void saveExit() {
-		super.saveExit();
 		try {
 			FileWriter editorComponentsFile = new FileWriter(".run/editorComponents.dat");
 			editorComponentsFile.write(gson.toJson(levelEditorComponents));
@@ -147,15 +83,32 @@ public class LevelEditorScene extends Scene {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		try {
+			FileWriter cameraFile = new FileWriter(".run/camera.dat");
+			cameraFile.write(gson.toJson(this.camera));
+			cameraFile.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
 	public void load() {
-		super.load();
+		String cameraFile = "";
+		try {
+			cameraFile = new String(Files.readAllBytes(Paths.get(".run/camera.dat")));
+		} catch (IOException ignored) {
+		}
+		if (!(cameraFile.equals("") || cameraFile.equals("{}"))) {
+			this.camera = gson.fromJson(cameraFile, Camera.class);
+			camera.init(camera.position);
+			cameraLoaded = true;
+		}
 		String editorComponentsFile = "";
 		try {
 			editorComponentsFile = new String(Files.readAllBytes(Paths.get(".run/editorComponents.dat")));
-		} catch (IOException ignored) {}
+		} catch (IOException ignored) {
+		}
 		if (!(editorComponentsFile.equals("") || editorComponentsFile.equals("{}"))) {
 			this.levelEditorComponents = gson.fromJson(editorComponentsFile, GameObject.class);
 		}

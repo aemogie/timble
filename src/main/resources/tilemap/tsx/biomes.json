@@ -1,0 +1,15 @@
+{
+	"columns": 2,
+	"image": "../textures/biomes.png",
+	"imageheight": 32,
+	"imagewidth": 32,
+	"margin": 0,
+	"name": "biomes",
+	"spacing": 0,
+	"tilecount": 4,
+	"tiledversion": "1.5.0",
+	"tileheight": 16,
+	"tilewidth": 16,
+	"type": "tileset",
+	"version": 1.5
+}
