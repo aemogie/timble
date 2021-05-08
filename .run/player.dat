@@ -1,0 +1,55 @@
+{
+  "transform": {
+    "position": {
+      "x": 654.1975,
+      "y": 783.24457
+    },
+    "scale": {
+      "x": 32.0,
+      "y": 32.0
+    }
+  },
+  "UUID": 0,
+  "name": "Player",
+  "components": [
+    {
+      "type": "com.theaemogie.timble.components.SpriteRenderer",
+      "properties": {
+        "color": {
+          "r": 255.0,
+          "g": 255.0,
+          "b": 255.0,
+          "a": 255.0
+        },
+        "sprite": {
+          "texture": {
+            "filepath": "C:\\Users\\Sehandu\\AppData\\Roaming\\STM-Creations\\Java-Development\\LWJGL\\LWJGL Learning\\src\\main\\resources\\sprites\\sprite1_spritesheet.png",
+            "width": 64,
+            "height": 64
+          },
+          "textureCoords": [
+            {
+              "x": 0.25,
+              "y": 0.75
+            },
+            {
+              "x": 0.25,
+              "y": 0.5
+            },
+            {
+              "x": 0.0,
+              "y": 0.5
+            },
+            {
+              "x": 0.0,
+              "y": 0.75
+            }
+          ],
+          "width": 16.0,
+          "height": 16.0
+        },
+        "UUID": 0
+      }
+    }
+  ]
+}
