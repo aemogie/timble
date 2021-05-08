@@ -116,7 +116,7 @@ public class ImGuiLayer {
         fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesDefault());
 
         fontConfig.setPixelSnapH(true);
-        fontAtlas.addFontFromFileTTF(resourcePath("fonts/8bit-8px.ttf"), 10, fontConfig);
+        fontAtlas.addFontFromFileTTF(resourcePath("fonts/8bit-8px.ttf").toAbsolutePath().toString(), 10, fontConfig);
 
         fontConfig.destroy();
 
@@ -129,7 +129,7 @@ public class ImGuiLayer {
         // Any Dear ImGui code SHOULD go between ImGui.newFrame()/ImGui.render() methods
         ImGui.newFrame();
         setupDockSpace(window); //Window begun. Have to end after process()
-        process(window, deltaTime, currentScene);
+        process(window, currentScene);
         ImGui.end(); //Window ends.
         ImGui.render();
 
@@ -140,9 +140,9 @@ public class ImGuiLayer {
         imGuiGlfw.newFrame();
     }
     
-    public void process(Window window, float deltaTime,Scene currentScene) {
+    public void process(Window window, Scene currentScene) {
         ImGui.showDemoWindow();
-        propertiesWindow.update(window, deltaTime, currentScene);
+        propertiesWindow.update(window, currentScene);
         propertiesWindow.imGui();
         gameViewWindow.imGui(window);
     }

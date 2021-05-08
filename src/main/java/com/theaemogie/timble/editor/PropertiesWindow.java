@@ -16,13 +16,13 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
  */
 public class PropertiesWindow {
 	private GameObject activeGameObject = null;
-	private PickingTexture pickingTexture;
+	private final PickingTexture pickingTexture;
 	
 	public PropertiesWindow(PickingTexture pickingTexture) {
 		this.pickingTexture = pickingTexture;
 	}
 	
-	public void update(Window window, float deltaTime, Scene currentScene) {
+	public void update(Window window, Scene currentScene) {
 		if (MouseListener.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 			int x = (int) MouseListener.getScreenX(window);
 			int y = (int) MouseListener.getScreenY(window);

@@ -4,22 +4,23 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.theaemogie.timble.components.Component;
 import com.theaemogie.timble.components.SpriteRenderer;
+import com.theaemogie.timble.eventhandlers.MouseListener;
 import com.theaemogie.timble.renderer.Renderer;
+import com.theaemogie.timble.tiles.Tile;
 import com.theaemogie.timble.timble.Camera;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Window;
 import com.theaemogie.timble.util.AssetPool;
 import com.theaemogie.timble.util.typeadapter.ComponentTypeAdapter;
 import com.theaemogie.timble.util.typeadapter.GameObjectTypeAdapter;
+import com.theaemogie.timble.util.typeadapter.PathTypeAdapter;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
@@ -30,16 +31,13 @@ public abstract class Scene {
 	protected Camera camera = null;
 	protected List<GameObject> gameObjects = new ArrayList<>();
 	protected transient boolean cameraLoaded = false;
-	protected final int mapWidth, mapHeight;
-	protected final int tileWidth, tileHeight;
+	protected Vector2i mapScale = new Vector2i();
+	protected Vector2i scale;
 	private transient boolean isRunning = false;
-	private final List<GameObject> tiles = new ArrayList<>();
+	private final List<Tile> tiles = new ArrayList<>();
 	
-	public Scene(int mapWidth, int mapHeight, int tileWidth, int tileHeight) {
-		this.mapWidth = mapWidth;
-		this.mapHeight = mapHeight;
-		this.tileWidth = tileWidth;
-		this.tileHeight = tileHeight;
+	public Scene(Vector2i scale) {
+		this.scale = scale;
 	}
 	
 	public void init(Window window) {
@@ -48,25 +46,18 @@ public abstract class Scene {
 			camera.init(new Vector2f());
 		}
 		camera.adjustProjection();
-		loadResources();
 	}
 	
 	public void start() {
-		tiles.forEach(GameObject::start);
-		tiles.forEach(tile -> renderer.add(tile));
+		tiles.forEach(Tile::start);
+		tiles.forEach(renderer::add);
 		gameObjects.forEach(GameObject::start);
-		gameObjects.forEach(gameObject -> renderer.add(gameObject));
+		gameObjects.forEach(renderer::add);
 		isRunning = true;
 	}
 	
-	public void addTilesToScene(GameObject tile) {
-		if (!isRunning) {
-			tiles.add(tile);
-		} else {
-			tiles.add(tile);
-			tile.start();
-			this.renderer.add(tile);
-		}
+	public void addTilesToScene(List<Tile> tiles) {
+		this.tiles.addAll(tiles);
 	}
 	
 	public void addGameObjectToScene(GameObject gameObject) {
@@ -79,9 +70,25 @@ public abstract class Scene {
 		}
 	}
 	
+	@SuppressWarnings("SuspiciousMethodCalls")
 	public void removeGameObjectFromScene(GameObject gameObject) {
-		gameObjects.remove(gameObject);
+		if (gameObject == null) return;
 		this.renderer.remove(gameObject);
+		if (gameObjects.contains(gameObject)) {
+			for (GameObject go : gameObjects) {
+				if (go == null) continue;
+				if (go.getUUID() == gameObject.getUUID()) {
+					gameObjects.set(gameObjects.indexOf(gameObject), null);
+					return;
+				}
+			}
+		}
+		if (tiles.contains(gameObject)) {
+			for (GameObject tile : tiles) {
+				if (tile == null) continue;
+				if (tile.getUUID() == gameObject.getUUID()) tiles.set(tiles.indexOf(gameObject), null);
+			}
+		}
 	}
 	
 	protected void loadResources() {
@@ -103,11 +110,14 @@ public abstract class Scene {
 		}
 	}
 	
-	public void preFrame(Window window) {}
+	public void preFrame(Window window) {
+		MouseListener.setGameViewPortPos(new Vector2f());
+		MouseListener.setGameViewPortSize(new Vector2f(window.getWidth(), window.getHeight()));
+	}
 	
 	public void update(Window window, double deltaTime) {
-		tiles.forEach(tile -> tile.update(window, deltaTime));
-		gameObjects.forEach(gameObject -> gameObject.update(window, deltaTime));
+		tiles.stream().filter(Objects::nonNull).forEach(tile -> tile.update(window, deltaTime));
+		gameObjects.stream().filter(Objects::nonNull).forEach(gameObject -> gameObject.update(window, deltaTime));
 	}
 	
 	public void render(Window window) {
@@ -125,62 +135,59 @@ public abstract class Scene {
 	}
 	
 	public GameObject getGameObject(int ID) {
-		Optional<GameObject> result = this.gameObjects.stream().filter(gameObject -> gameObject.getUUID() == ID).findFirst();
-		Optional<GameObject> tileResult = this.tiles.stream().filter(tile -> tile.getUUID() == ID).findFirst();
-		return result.orElse(tileResult.orElse(null));
+		for (GameObject gameObject : gameObjects) {
+			if (gameObject == null) continue;
+			if (gameObject.getUUID() == ID) {
+				return gameObject;
+			}
+		}
+		for (GameObject tile : tiles) {
+			if (tile == null) continue;
+			if (tile.getUUID() == ID) {
+				return tile;
+			}
+		}
+		return null;
 	}
 	
 	public int getMapWidth() {
-		return mapWidth;
+		return mapScale.x;
+	}
+	
+	public void setMapWidth(int x) {
+		mapScale.x = x;
 	}
 	
 	public int getMapHeight() {
-		return mapHeight;
+		return mapScale.y;
+	}
+	
+	public void setMapHeight(int y) {
+		mapScale.y = y;
 	}
 	
 	public int getTileWidth() {
-		return tileWidth;
+		return scale.x;
 	}
 	
 	public int getTileHeight() {
-		return tileHeight;
+		return scale.y;
 	}
 	
 	//region GSON stuff.
-	
 	//region GSON variable for usage.
 	protected static Gson gson = new GsonBuilder()
 			.setPrettyPrinting()
 			.registerTypeAdapter(Component.class, new ComponentTypeAdapter())
 			.registerTypeAdapter(GameObject.class, new GameObjectTypeAdapter())
+			.registerTypeAdapter(Path.class, new PathTypeAdapter())
 			.create();
 	//endregion
-	
 	//region Serialization.
-	public void saveExit() {
-		try {
-			FileWriter cameraFile = new FileWriter(".run/camera.dat");
-			cameraFile.write(gson.toJson(this.camera));
-			cameraFile.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+	public void saveExit() {}
 	//endregion
-	
 	//region Deserialization
-	public void load() {
-		String cameraFile = "";
-		try {
-			cameraFile = new String(Files.readAllBytes(Paths.get(".run/camera.dat")));
-		} catch (IOException ignored) {}
-		if (!(cameraFile.equals("") || cameraFile.equals("{}"))) {
-			this.camera = gson.fromJson(cameraFile, Camera.class);
-			camera.init(camera.position);
-			cameraLoaded = true;
-		}
-	}
+	public void load() {}
 	//endregion
-	
 	//endregion
 }

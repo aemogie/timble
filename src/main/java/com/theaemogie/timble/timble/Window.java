@@ -45,8 +45,8 @@ public class Window {
 	//region Constructor.
 	private Window(String title, Vector3f color, boolean vsync) {
 		this.title = title;
-		this.width = videoMode.width();
-		this.height = videoMode.height();
+		this.width = (int) (videoMode.width() / 1.625);
+		this.height = (int) (videoMode.height() / 1.625);
 		this.r = color.x;
 		this.g = color.y;
 		this.b = color.z;
@@ -83,7 +83,7 @@ public class Window {
 		glfwDefaultWindowHints(); //Default window hints
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); //Invisible till setup is complete
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); //Resizable to true in-case default doesn't work
-		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+//		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 		
 		// Create the window
 		glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL); //The long is the memory address of the window.
@@ -123,10 +123,11 @@ public class Window {
 		// Set resize callback after we make the current context.
 		glfwSetWindowSizeCallback(glfwWindow, (window, width, height) -> WindowResizeListener.resizeCallback(this, width, height));
 		
-		Window.this.changeScene(scene);
 		
 		this.frameBuffer = new FrameBuffer(width, height);
 		this.pickingTexture = new PickingTexture(width, height);
+		
+		Window.this.changeScene(scene);
 		
 		if (currentScene instanceof LevelEditorScene) {
 			imGuiLayer = new ImGuiLayer(glfwWindow, pickingTexture);
@@ -137,7 +138,6 @@ public class Window {
 	}
 	
 	public void windowLoop() {
-		
 		double startTime = Time.getTime();
 		double endTime;
 		double deltaTime = -1.0;
@@ -249,9 +249,13 @@ public class Window {
 	}
 	//endregion
 	
-	//region Get framebuffer.
+	//region Get framebuffer and picking texture.
 	public FrameBuffer getFrameBuffer() {
 		return this.frameBuffer;
+	}
+	
+	public PickingTexture getPickingTexture() {
+		return pickingTexture;
 	}
 	//endregion
 }

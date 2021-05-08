@@ -11,17 +11,18 @@ import java.util.List;
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
  */
 public class SpriteSheet {
-
-    private Texture texture;
+    
     private List<Sprite> sprites;
-
+    
+    protected SpriteSheet() {}
+    
     public SpriteSheet(Texture texture, int spriteWidth, int spriteHeight, int numOfSprites, int spacing) {
+        
         this.sprites = new ArrayList<>();
-        this.texture = texture;
-
+    
         int currentX = 0;
         int currentY = texture.getHeight() - spriteHeight;
-
+        
         for (int i = 0; i < numOfSprites; i++) {
             float topY = (currentY + spriteHeight) / (float) texture.getHeight();
             float rightX = (currentX + spriteWidth) / (float) texture.getWidth();
@@ -36,7 +37,7 @@ public class SpriteSheet {
             };
 
             Sprite sprite = new Sprite();
-            sprite.setTexture(this.texture);
+            sprite.setTexture(texture);
             sprite.setTextureCoords(textureCoords);
             sprite.setWidth(spriteWidth);
             sprite.setHeight(spriteHeight);
@@ -50,13 +51,6 @@ public class SpriteSheet {
             }
         }
     }
-//    public SpriteSheet(Texture texture, int spriteWidth, int spriteHeight, int numOfSprites, int spacing) {
-//        new SpriteSheet(texture, spriteWidth, spriteHeight, numOfSprites, spacing, spacing);
-//    }
-//
-//    public SpriteSheet(Texture texture, int spriteWidth, int spriteHeight, int numOfSprites) {
-//        new SpriteSheet(texture, spriteWidth, spriteHeight, numOfSprites, 0);
-//    }
 
     public Sprite getSprite(int index) {
         if (index <= -1) {
@@ -70,6 +64,7 @@ public class SpriteSheet {
         return this.sprites.size();
     }
     
+    @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     @Override
     public String toString() {
         StringBuilder outputString = new StringBuilder(this.getClass().getCanonicalName() + ":\n");
