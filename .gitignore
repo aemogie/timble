@@ -2,8 +2,7 @@
 /.gradle/
 /.idea/
 /build/
-/build/classes/java/main/
 /gradle/
-/src/main/resources/assets/textures/paint.net projects/sprites/
-/src/main/java/com/theaemogie/test/
 /exports/
+/.run/*
+/src/main/resources/external/
