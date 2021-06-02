@@ -5,7 +5,7 @@ import com.theaemogie.timble.timble.Camera;
 import com.theaemogie.timble.timble.Window;
 import org.joml.Vector2f;
 
-import static com.theaemogie.timble.util.Settings.*;
+import static com.theaemogie.timble.util.PresetsSettings.*;
 
 /**
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>

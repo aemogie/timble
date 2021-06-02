@@ -1,6 +1,6 @@
 package com.theaemogie.timble.util;
 
-import com.theaemogie.timble.tiles.SpriteSheet;
+import com.theaemogie.timble.renderer.SpriteSheet;
 import com.theaemogie.timble.renderer.Shader;
 import com.theaemogie.timble.renderer.Texture;
 

@@ -5,14 +5,13 @@ import com.theaemogie.timble.timble.Window;
 import com.theaemogie.timble.util.AssetPool;
 import com.theaemogie.timble.util.TimbleMath;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.theaemogie.timble.util.Settings.MAX_LINES;
+import static com.theaemogie.timble.util.PresetsSettings.MAX_LINES;
 import static com.theaemogie.timble.util.StringUtils.resourcePath;
 import static org.lwjgl.opengl.GL30.*;
 

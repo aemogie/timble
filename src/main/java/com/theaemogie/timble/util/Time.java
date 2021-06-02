@@ -9,7 +9,6 @@ public class Time {
     public static double timeStarted = glfwGetTime();
 
     public static double getTime(){
-        double timeElapsed =  (glfwGetTime() - timeStarted);
-        return timeElapsed;
+        return (glfwGetTime() - timeStarted);
     }
 }

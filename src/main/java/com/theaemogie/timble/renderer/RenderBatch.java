@@ -1,11 +1,14 @@
 package com.theaemogie.timble.renderer;
 
 import com.theaemogie.timble.components.SpriteRenderer;
-import com.theaemogie.timble.timble.Window;
+import com.theaemogie.timble.scenes.LevelScene;
+import com.theaemogie.timble.scenes.Scene;
+import com.theaemogie.timble.util.Logger;
+import com.theaemogie.timble.util.Time;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL20;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +38,7 @@ public class RenderBatch {
 	//endregion
 	
 	//region Variables
-	private final int POS_SIZE = 2;
+	private final int POS_SIZE = 3;
 	private final int POS_OFFSET = 0;
 	
 	private final int COLOR_SIZE = 4;
@@ -50,18 +53,18 @@ public class RenderBatch {
 	private final int ENTITY_ID_SIZE = 1;
 	private final int ENTITY_ID_OFFSET = TEXTURE_ID_OFFSET + TEXTURE_ID_SIZE * Float.BYTES;
 	
-	private final int VERTEX_SIZE = 2 + 4 + 2 + 1 + 1;
+	private final int VERTEX_SIZE = POS_SIZE + COLOR_SIZE + TEXTURE_COORDS_SIZE + TEXTURE_ID_SIZE + ENTITY_ID_SIZE;
 	private final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
 	
-	private ArrayList<SpriteRenderer> sprites;
+	private final ArrayList<SpriteRenderer> sprites;
 	private boolean hasRoom;
 	
-	private float[] vertices;
-	private int[] textureSlots = {0, 1, 2, 3, 4, 5, 6, 7};
+	private final float[] vertices;
+	private final int[] textureSlots = {0, 1, 2, 3, 4, 5, 6, 7};
 	
 	private int vaoID, vboID;
-	private int maxBatchSize;
-	private List<Texture> textures;
+	private final int maxBatchSize;
+	private final List<Texture> textures;
 	//endregion
 	
 	public RenderBatch(int maxBatchSize) {
@@ -141,7 +144,7 @@ public class RenderBatch {
 		//endregion
 	}
 	
-	public void render(Window window) {
+	public void render(Scene scene) {
 		
 		//region Check if any sprites are dirty. If yes, reload and rebuffer.
 		boolean rebufferData = false;
@@ -159,15 +162,37 @@ public class RenderBatch {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
 		}
 		//endregion
+		
 		//region Use shader.
 		Shader shader = Renderer.getBoundShader();
-		shader.uploadMat4f("uProjection", window.getCurrentScene().getCamera().getProjectionMatrix());
-		shader.uploadMat4f("uView", window.getCurrentScene().getCamera().getViewMatrix());
+		shader.uploadMat4f("uProjection", scene.getCamera().getProjectionMatrix());
+		shader.uploadMat4f("uView", scene.getCamera().getViewMatrix());
 		for (int i = 0; i < textures.size(); i++) {
 			glActiveTexture(GL_TEXTURE0 + i + 1);
 			textures.get(i).bind();
 		}
-		shader.uploadIntArray("uTextures", textureSlots);
+		shader.uploadIntArray("textures", textureSlots);
+		
+		shader.uploadVec2f("uWindowSize", new Vector2f(scene.getMapWidth() * scene.getTileWidth(), scene.getMapHeight() * scene.getTileHeight()));
+		
+		if (Time.getTime() < scene.getFadeTime()) {
+			shader.uploadFloat("timeElapsed", (float) Time.getTime());
+			shader.uploadFloat("fadeTime", scene.getFadeTime());
+		}
+		
+		
+		if (scene instanceof LevelScene) {
+			LevelScene levelScene = (LevelScene) scene;
+			shader.uploadBoolean("lighting", true);
+			Vector2f[] dynLights = new Vector2f[]{levelScene.getDLPlayerPos()};
+			shader.uploadVec2fArray("lights", dynLights);
+			shader.uploadInt("lightCount", dynLights.length);
+			shader.uploadFloat("radius", levelScene.getDLRadius());
+			shader.uploadFloat("intensity", levelScene.getDlIntensity());
+		} else {
+			shader.uploadBoolean("lighting", false);
+		}
+		
 		//endregion
 		
 		//region Enable VAO
@@ -234,7 +259,6 @@ public class RenderBatch {
 			}
 		}
 		
-		
 		//region Add vertices with appropriate properties.
 		float xAdd = 1.0f;
 		float yAdd = 1.0f;
@@ -250,22 +274,23 @@ public class RenderBatch {
 			//load pos
 			vertices[offset + 0] = sprite.gameObject.transform.position.x + (xAdd * sprite.gameObject.transform.scale.x);
 			vertices[offset + 1] = sprite.gameObject.transform.position.y + (yAdd * sprite.gameObject.transform.scale.y);
+			vertices[offset + 2] = sprite.gameObject.transform.position.z;
 			
 			//load color
-			vertices[offset + 2] = color.x;
-			vertices[offset + 3] = color.y;
-			vertices[offset + 4] = color.z;
-			vertices[offset + 5] = color.w;
+			vertices[offset + 3] = color.x;
+			vertices[offset + 4] = color.y;
+			vertices[offset + 5] = color.z;
+			vertices[offset + 6] = color.w;
 			
 			//load texture coordinates
-			vertices[offset + 6] = textureCoords[i].x;
-			vertices[offset + 7] = textureCoords[i].y;
+			vertices[offset + 7] = textureCoords[i].x;
+			vertices[offset + 8] = textureCoords[i].y;
 			
 			//load texture id
-			vertices[offset + 8] = textureID;
+			vertices[offset + 9] = textureID;
 			
 			//load entity id
-			vertices[offset + 9] = sprite.gameObject.getUUID() + 1;
+			vertices[offset + 10] = sprite.gameObject.getUUID() + 1;
 			
 			offset += VERTEX_SIZE;
 		}

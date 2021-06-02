@@ -3,7 +3,7 @@ package com.theaemogie.timble.editor;
 import com.theaemogie.timble.components.SpriteRenderer;
 import com.theaemogie.timble.eventhandlers.MouseListener;
 import com.theaemogie.timble.scenes.Scene;
-import com.theaemogie.timble.tiles.PickingTexture;
+import com.theaemogie.timble.renderer.PickingTexture;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Window;
 import imgui.ImGui;

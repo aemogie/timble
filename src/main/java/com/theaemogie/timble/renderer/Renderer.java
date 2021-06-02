@@ -1,6 +1,7 @@
 package com.theaemogie.timble.renderer;
 
 import com.theaemogie.timble.components.SpriteRenderer;
+import com.theaemogie.timble.scenes.Scene;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Window;
 
@@ -11,8 +12,9 @@ import java.util.List;
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
  */
 public class Renderer {
+    @SuppressWarnings("FieldCanBeLocal")
     private final int MAX_BATCH_SIZE = 1000;
-    private List<RenderBatch> batches;
+    private final List<RenderBatch> batches;
     private static Shader currentShader;
 
     public Renderer() {
@@ -66,10 +68,10 @@ public class Renderer {
         return currentShader;
     }
 
-    public void render(Window window) {
+    public void render(Scene scene) {
         currentShader.use();
         for (RenderBatch batch : batches) {
-            batch.render(window);
+            batch.render(scene);
         }
     }
 }

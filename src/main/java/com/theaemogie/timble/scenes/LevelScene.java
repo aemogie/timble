@@ -3,13 +3,13 @@ package com.theaemogie.timble.scenes;
 import com.theaemogie.timble.components.MovementController;
 import com.theaemogie.timble.components.SpriteRenderer;
 import com.theaemogie.timble.eventhandlers.KeyListener;
-import com.theaemogie.timble.eventhandlers.MouseListener;
-import com.theaemogie.timble.tiles.SpriteSheet;
-import com.theaemogie.timble.tiles.TiledMap;
+import com.theaemogie.timble.renderer.SpriteSheet;
+import com.theaemogie.timble.tiled.TiledMap;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Transform;
 import com.theaemogie.timble.timble.Window;
 import com.theaemogie.timble.util.AssetPool;
+import com.theaemogie.timble.util.Time;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -27,12 +27,20 @@ import static org.lwjgl.glfw.GLFW.*;
  */
 public class LevelScene extends Scene {
 	
+	final float timeInDay = 30f;
 	GameObject player = null;
 	float clickDebounce = 1f;
 	boolean released = true;
+	float dlIntensity = 0.125f; //0 = Off, 1 = Max
+	float dlInitRadius = 32 * 8;
+	float currentTime = 0f;
 	
-	public LevelScene() {
-		super(new Vector2i(32, 32));
+	public LevelScene(Window window) {
+		super(
+				window,
+				new Vector2i(32),
+				2f
+		);
 	}
 	
 	@Override
@@ -44,13 +52,12 @@ public class LevelScene extends Scene {
 			player = new GameObject("Player", new Transform(new Vector2f(0, 0), new Vector2f(scale)));
 			player.addComponent(new SpriteRenderer().setSprite(AssetPool.getSpriteSheet(resourcePath("sprites/sprite1_spritesheet.png")).getSprite(4)));
 		}
-		player.addComponent(new MovementController().setScene(this));
 		addGameObjectToScene(player);
 		//endregion
 		new TiledMap(resourcePath("tilemap/map.json"), scale.x, scale.y, this);
 		super.loadResources();
 	}
-
+	
 	@Override
 	protected void loadResources() {
 		AssetPool.addSpriteSheet(
@@ -59,30 +66,26 @@ public class LevelScene extends Scene {
 						AssetPool.getTexture(resourcePath("sprites/sprite1_spritesheet.png")),
 						16,
 						16,
-						16,
 						0
 				)
 		);
 	}
 	
 	@Override
-	public void update(Window window, double deltaTime) {
-		super.update(window, deltaTime);
+	public void update(double deltaTime) {
+		if (currentTime >= timeInDay) {
+			currentTime = (float) deltaTime;
+		} else {
+			currentTime += deltaTime;
+		}
+		super.update(deltaTime);
 		zoom((float) deltaTime);
-		if (KeyListener.isKeyPressed(GLFW_KEY_G)) {
-			removeGameObjectFromScene(player);
+		if (Time.getTime() > FADE_TIME && player.getComponent(MovementController.class) == null) {
+			player.addComponent(new MovementController().setScene(this));
 		}
-	}
-	
-	@Override
-	public void postFrame(Window window, double deltaTime) {
-		if (MouseListener.isButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-			int x = (int) MouseListener.getScreenX(window);
-			int y = (int) MouseListener.getScreenY(window);
-			int gameObjectID = window.getPickingTexture().readPixel(x, y);
-			if (gameObjectID < 0) return;
-			this.removeGameObjectFromScene(getGameObject(gameObjectID));
-		}
+
+//		camera.smoothFollow(WINDOW, new Transform(new Vector2f(WINDOW.getWidth()/2f, WINDOW.getHeight()/2f)), 0);
+		camera.smoothFollow(WINDOW.getWidth(), WINDOW.getHeight(), mapScale.x * scale.x + scale.x, mapScale.y * scale.y + scale.y, player.transform, 0.045f);
 	}
 	
 	private void zoom(float deltaTime) {
@@ -126,5 +129,19 @@ public class LevelScene extends Scene {
 			return;
 		}
 		this.player = gson.fromJson(playerFile, GameObject.class);
+	}
+	
+	public Vector2f getDLPlayerPos() {
+		Vector2f playerOrigin = new Vector2f(player.transform.position.x, player.transform.position.y);
+		Vector2f playerCenter = new Vector2f(player.transform.scale).div(2);
+		return playerOrigin.add(playerCenter);
+	}
+	
+	public float getDlIntensity() {
+		return dlIntensity;
+	}
+	
+	public float getDLRadius() {
+		return dlInitRadius;
 	}
 }

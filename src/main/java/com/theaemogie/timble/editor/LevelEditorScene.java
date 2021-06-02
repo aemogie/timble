@@ -4,11 +4,12 @@ import com.theaemogie.timble.components.EditorCamera;
 import com.theaemogie.timble.components.GridLines;
 import com.theaemogie.timble.components.MouseControls;
 import com.theaemogie.timble.scenes.Scene;
-import com.theaemogie.timble.tiles.TiledMap;
+import com.theaemogie.timble.tiled.TiledMap;
 import com.theaemogie.timble.timble.Camera;
 import com.theaemogie.timble.timble.GameObject;
 import com.theaemogie.timble.timble.Transform;
 import com.theaemogie.timble.timble.Window;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 
 import java.io.FileWriter;
@@ -25,8 +26,12 @@ public class LevelEditorScene extends Scene {
 	
 	private GameObject levelEditorComponents = null;
 	
-	public LevelEditorScene() {
-		super(new Vector2i(32, 32));
+	public LevelEditorScene(Window window) {
+		super(
+				window,
+				new Vector2i(32, 32),
+				0f
+		);
 	}
 	
 	@Override
@@ -57,9 +62,9 @@ public class LevelEditorScene extends Scene {
 	}
 	
 	@Override
-	public void update(Window window, double deltaTime) {
-		levelEditorComponents.update(window, deltaTime);
-		super.update(window, deltaTime);
+	public void update(double deltaTime) {
+		levelEditorComponents.update(WINDOW, deltaTime);
+		super.update(deltaTime);
 	}
 	
 	@Override

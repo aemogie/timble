@@ -1,4 +1,4 @@
-package com.theaemogie.timble.tiles;
+package com.theaemogie.timble.renderer;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL30.*;

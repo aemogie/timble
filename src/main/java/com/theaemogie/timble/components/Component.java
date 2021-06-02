@@ -15,7 +15,7 @@ import java.lang.reflect.Modifier;
  */
 public abstract class Component {
 
-    public static int ID_COUNTER = 0;
+    private static int ID_COUNTER = 0;
     private int UUID = -1;
 
     public transient GameObject gameObject = null;

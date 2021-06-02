@@ -39,6 +39,6 @@ public class MovementController extends Component {
 			if (gameObject.transform.position.x + movementSpeed < (scene.getMapWidth() * scene.getTileWidth()) - scene.getTileWidth())
 				gameObject.transform.position.x += movementSpeed;
 		}
-		scene.getCamera().smoothFollow(window.getWidth(), window.getHeight(), scene.getMapWidth() * scene.getTileWidth() + (int) (scene.getTileWidth() * 2.6875f), scene.getMapHeight() * scene.getTileHeight() + (int) (scene.getTileHeight() * 4.5f), gameObject.transform, 0.045f);
+		
 	}
 }

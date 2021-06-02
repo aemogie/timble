@@ -14,7 +14,7 @@ import org.joml.Vector4f;
  */
 public class SpriteRenderer extends Component {
 	
-	private Color color = new Color(255);
+	private Color color = new Color(1, true);
 	private Sprite sprite = new Sprite();
 	
 	private transient Transform lastTransform;
@@ -95,8 +95,6 @@ public class SpriteRenderer extends Component {
 	
 	@Override
 	public String toString() {
-		StringBuilder outputString = new StringBuilder("Class: " + this.getClass().getCanonicalName() + "\n");
-		outputString.append("Sprite: \n" + this.sprite.toString().replaceAll("(?m)^", "\t") + "\n");
-		return outputString.toString();
+		return "Class: " + this.getClass().getCanonicalName() + "\n" + "Sprite: \n" + this.sprite.toString().replaceAll("(?m)^", "\t") + "\n";
 	}
 }

@@ -1,5 +1,6 @@
-{ "columns":16,
- "image":"../textures/terrain.png",
+{ "backgroundcolor":"#27a14e",
+ "columns":16,
+ "image":"..\/textures\/terrain.png",
  "imageheight":256,
  "imagewidth":256,
  "margin":0,

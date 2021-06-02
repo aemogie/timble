@@ -4,6 +4,8 @@ import com.theaemogie.timble.util.TimbleMath;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import static com.theaemogie.timble.util.Logger.debugLog;
+
 /**
  * @author <a href="mailto:theaemogie@gmail.com"> Aemogie. </a>
  */
@@ -20,6 +22,7 @@ public class Color {
 		this.b = b;
 		this.a = a;
 	}
+	
 	public Color(float r, float g, float b, float a, boolean normalized) {
 		this(r, g, b, a);
 		if (normalized) {
@@ -34,8 +37,8 @@ public class Color {
 		this(r, g, b, 255);
 	}
 	
-	public Color(float c) {
-		this(c, c, c);
+	public Color(float alpha, boolean normalized) {
+		this(normalized ? 1 : 255, normalized ? 1 : 255, normalized ? 1 : 255, alpha, normalized);
 	}
 	
 	private static float toMap(float value) {
@@ -46,16 +49,16 @@ public class Color {
 		return TimbleMath.map(value, 0, 1, 0, 255);
 	}
 	
+	public static Color fromNormVec4(Vector4f color) {
+		return new Color(fromMap(color.x), fromMap(color.y), fromMap(color.z), fromMap(color.w));
+	}
+	
 	public Vector4f toNormVec4() {
 		return new Vector4f(toMap(r), toMap(g), toMap(b), toMap(a));
 	}
 	
 	public Vector3f toNormVec3() {
 		return new Vector3f(toMap(r), toMap(g), toMap(b));
-	}
-	
-	public static Color fromNormVec4(Vector4f color) {
-		return new Color(fromMap(color.x), fromMap(color.y), fromMap(color.z), fromMap(color.w));
 	}
 	
 	//region setColor method and overloads.
@@ -97,11 +100,11 @@ public class Color {
 	}
 	
 	public void setColor(float in) {
-		this.setColor(in,false);
+		this.setColor(in, false);
 	}
 	
 	public void setColor(Vector4f in, boolean normalized) {
-		this.setColor(in.x, in.y, in.z, in.w,normalized);
+		this.setColor(in.x, in.y, in.z, in.w, normalized);
 	}
 	
 	public void setColor(Vector4f in) {
@@ -109,7 +112,7 @@ public class Color {
 	}
 	
 	public void setColor(Vector3f in, boolean normalized) {
-		this.setColor(in.x, in.y, in.z,normalized);
+		this.setColor(in.x, in.y, in.z, normalized);
 	}
 	
 	public void setColor(Vector3f in) {
@@ -122,6 +125,11 @@ public class Color {
 		this.b = color.b;
 		this.a = color.a;
 	}
-	
 	//endregion
+	
+	
+	@Override
+	public String toString() {
+		return "Red: " + r + " Green: " + g + " Blue: " + b + " Alpha: " + a;
+	}
 }

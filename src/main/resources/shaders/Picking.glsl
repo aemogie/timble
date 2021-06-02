@@ -1,4 +1,4 @@
-#type vertex
+#type GL_VERTEX_SHADER
 #version 330 core
 
 layout (location = 0) in vec3 aPos;
@@ -21,10 +21,10 @@ void main() {
     fTexID = aTexID;
     fEntityID = aEntityID;
 
-    gl_Position = uProjection * uView * vec4(aPos, 1.0);
+    gl_Position = uProjection * uView * uvec4(aPos, 1.0);
 }
 
-#type fragment
+#type GL_FRAGMENT_SHADER
 #version 330 core
 
 in vec4 fColor;

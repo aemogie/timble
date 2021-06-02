@@ -1,73 +1,73 @@
 plugins {
-    id 'java'
-    id 'scala'
+	id 'java'
+//    id 'scala'
 }
 
 group 'com.theaemogie'
-version '1.0-SNAPSHOT'
+version '1.0'
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 sourceCompatibility = 1.8
 
 ext {
-    lwjglVersion = '3.2.3'
-    imguiVersion = '1.81.2'
-    jomlVersion = '1.10.1'
-    lwjglNatives = 'natives-windows'
+	lwjglVersion = '3.2.3'
+	imguiVersion = '1.81.2'
+	jomlVersion = '1.10.1'
+	lwjglNatives = 'natives-windows'
 }
 
 dependencies {
-    implementation group: 'org.jetbrains',name: 'annotations', version: '20.1.0' //Annotations
-    testImplementation group: 'junit', name: 'junit', version: '4.12' //JUnit
-    implementation group: 'org.scala-lang', name: 'scala-library', version: '2.13.5' //Scala
-
-    //region GSON
-    implementation group: 'com.google.code.gson',name: 'gson', version: '2.8.6'
-    //endregion
-
-    //region ImGui
-    implementation "io.github.spair:imgui-java-binding:$imguiVersion"
-    implementation "io.github.spair:imgui-java-lwjgl3:$imguiVersion"
-    implementation "io.github.spair:imgui-java-app:$imguiVersion"
-    implementation "io.github.spair:imgui-java-natives-windows:$imguiVersion"
-    //endregion
-
-    //region LWJGL
-
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-
-    implementation "org.lwjgl:lwjgl"
-
-    //GLFW
-    implementation "org.lwjgl:lwjgl-glfw"
-
-    //Native File Dialog
-    implementation "org.lwjgl:lwjgl-nfd"
-
-    //OpenAL
-    implementation "org.lwjgl:lwjgl-openal"
-
-    //OpenGL
-    implementation "org.lwjgl:lwjgl-opengl"
-
-    //STB
-    implementation "org.lwjgl:lwjgl-stb"
-
-    //region Natives
-    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-nfd::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
-    //endregion
-
-    //joml
-    implementation "org.joml:joml:$jomlVersion"
-    //endregion
+	implementation group: 'org.jetbrains',name: 'annotations', version: '20.1.0' //Annotations
+	testImplementation group: 'junit', name: 'junit', version: '4.12' //JUnit
+//    implementation group: 'org.scala-lang', name: 'scala-library', version: '2.13.5' //Scala
+	
+	//region GSON
+	implementation group: 'com.google.code.gson',name: 'gson', version: '2.8.6'
+	//endregion
+	
+	//region ImGui
+	implementation "io.github.spair:imgui-java-binding:$imguiVersion"
+	implementation "io.github.spair:imgui-java-lwjgl3:$imguiVersion"
+//    implementation "io.github.spair:imgui-java-app:$imguiVersion"
+	implementation "io.github.spair:imgui-java-natives-windows:$imguiVersion"
+	//endregion
+	
+	//region LWJGL
+	
+	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+	
+	implementation "org.lwjgl:lwjgl"
+	
+	//GLFW
+	implementation "org.lwjgl:lwjgl-glfw"
+	
+	//Native File Dialog
+	implementation "org.lwjgl:lwjgl-nfd"
+	
+	//OpenAL
+	implementation "org.lwjgl:lwjgl-openal"
+	
+	//OpenGL
+	implementation "org.lwjgl:lwjgl-opengl"
+	
+	//STB
+	implementation "org.lwjgl:lwjgl-stb"
+	
+	//region Natives
+	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-nfd::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+	//endregion
+	
+	//joml
+	implementation "org.joml:joml:$jomlVersion"
+	//endregion
 }
 //def cleanRuns = tasks.register("cleanRuns"){
 //    delete fileTree(".run").include("**/*.dat")
@@ -75,18 +75,20 @@ dependencies {
 //}
 
 jar {
-    manifest {
-        attributes("Manifest-Version": "1.0",
-                "Main-Class": "com.theaemogie.timble.Main")
-    }
+	manifest {
+		attributes(
+				"Manifest-Version": "1.0",
+				"Main-Class": "com.theaemogie.timble.Timble"
+		)
+	}
 }
 
 task fatJar(type: Jar) {
-    manifest.from jar.manifest
-    archiveClassifier.set 'all'
-    processResources.exclude("*")
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    with jar
+	manifest.from jar.manifest
+	archiveClassifier.set 'all'
+	processResources.exclude("*")
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+	with jar
 }

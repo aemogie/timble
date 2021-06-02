@@ -25,22 +25,23 @@ public class Camera {
 	
 	public void adjustProjection() {
 		projectionMatrix.identity();
-		projectionMatrix.ortho(0.0f, projectionSize.x * zoom, 0.0f, projectionSize.y * zoom, 0.0f, 100.0f);
+		projectionMatrix.ortho(0.0f, projectionSize.x * zoom, 0.0f, projectionSize.y * zoom, 0.0f, 100f);
+//		projectionMatrix.setPerspective(90, 16f / 9, 0.5f, Float.POSITIVE_INFINITY);
 		projectionMatrix.invert(inverseProjectionMatrix);
 	}
 	
 	public Matrix4f getViewMatrix() {
-		Vector3f cameraFront = new Vector3f(0.0f, 0.0f, -1.0f);
-		Vector3f cameraUp = new Vector3f(0.0f, 1.0f, 0.0f);
-		
+		Vector2f newPosition = new Vector2f(position);//.add(new Vector2f(32 * (1/zoom)));
+		Vector3f cameraFront = new Vector3f(0, 1, -1);
+		Vector3f cameraUp = new Vector3f(0, 1, 0);
+		Vector3f center = new Vector3f(newPosition, -1);
+		center.add(cameraFront);
 		this.viewMatrix.identity();
 		this.viewMatrix = this.viewMatrix.lookAt(
-				new Vector3f(position.x, position.y, 20.0f),
-				cameraFront.add(position.x, position.y, 0.0f),
-				cameraUp);
-		
-		this.viewMatrix.invert(inverseViewMatrix);
-		
+				new Vector3f(center.x, center.y, 20),//.mul(1,1,zoom),
+				center,
+				cameraUp
+		);
 		return this.viewMatrix;
 	}
 	
@@ -61,10 +62,10 @@ public class Camera {
 	}
 	
 	public void smoothFollow(int windowWidth, int windowHeight, int endWidth, int endHeight, Transform follow, float smoothing) {
-		Vector2f desiresPos = new Vector2f(follow.position).sub(new Vector2f(windowWidth / 2f, windowHeight / 2f)).mul(zoom);
-		int endX = endWidth - windowWidth;
-		int endY = endHeight - windowHeight;
-		position = new Vector2f(position).lerp(new Vector2f(
+		Vector2f desiresPos = new Vector2f(follow.position.x, follow.position.y).add(new Vector2f(follow.scale).div(2)).sub(new Vector2f(windowWidth / 2f, windowHeight / 2f).mul(zoom));
+		int endX = (int) ((endWidth - windowWidth) / zoom);
+		int endY = (int) ((endHeight - windowHeight) / zoom);
+		position.lerp(new Vector2f(
 				desiresPos.x >= 0 ? desiresPos.x >= endX ? endX : desiresPos.x : 0,
 				desiresPos.y >= 0 ? desiresPos.y >= endY ? endY : desiresPos.y : 0
 		), smoothing);

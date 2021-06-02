@@ -1,4 +1,4 @@
-package com.theaemogie.timble.tiles;
+package com.theaemogie.timble.tiled;
 
 import org.joml.Vector2f;
 
@@ -13,8 +13,7 @@ public class TiledMapLayer {
 	private final float opacity;
 	private final int width; //Towards positive X (Right)
 	private final int height; //Towards positive Y (Up)
-	private final int offsetX;   //Position of left bottom corner
-	private final int offsetY;   //   ""    ""  ""    ""     ""
+	private final Vector2f offset;
 	
 	public TiledMapLayer(int id, int[] data, boolean visible, float opacity, Vector2f scale, Vector2f offset) {
 		this.id = id;
@@ -23,8 +22,7 @@ public class TiledMapLayer {
 		this.opacity = opacity;
 		this.width = (int) scale.x;
 		this.height = (int) scale.y;
-		this.offsetX = (int) offset.x;
-		this.offsetY = (int) offset.y;
+		this.offset = offset;
 	}
 	
 	public int getId() {
@@ -47,12 +45,8 @@ public class TiledMapLayer {
 		return height;
 	}
 	
-	public int getOffsetX() {
-		return offsetX;
-	}
-	
-	public int getOffsetY() {
-		return offsetY;
+	public Vector2f getOffset() {
+		return offset;
 	}
 	
 	@Override

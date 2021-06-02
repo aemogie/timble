@@ -1,7 +1,7 @@
 package com.theaemogie.timble.timble;
 
 import com.theaemogie.timble.editor.LevelEditorScene;
-import com.theaemogie.timble.tiles.PickingTexture;
+import com.theaemogie.timble.renderer.PickingTexture;
 import com.theaemogie.timble.eventhandlers.KeyListener;
 import com.theaemogie.timble.eventhandlers.MouseListener;
 import com.theaemogie.timble.eventhandlers.WindowResizeListener;
@@ -10,7 +10,6 @@ import com.theaemogie.timble.scenes.LevelScene;
 import com.theaemogie.timble.scenes.Scene;
 import com.theaemogie.timble.util.AssetPool;
 import com.theaemogie.timble.util.Time;
-import imgui.app.Configuration;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -18,6 +17,8 @@ import org.lwjgl.opengl.GL;
 
 import java.util.Objects;
 
+import static com.theaemogie.timble.util.Logger.debugLog;
+import static com.theaemogie.timble.util.PresetsSettings.GREY;
 import static com.theaemogie.timble.util.StringUtils.resourcePath;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -31,51 +32,64 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Window {
 	
 	private final String title;
+	private final Color color;
+	private final boolean fullscreen;
 	private final boolean vsync;
-	public float r, g, b;
 	private Scene currentScene;
 	private long glfwWindow;
 	
-	private GLFWVidMode videoMode = Objects.requireNonNull(glfwGetVideoMode(glfwGetPrimaryMonitor()));
 	private int width, height;
 	public ImGuiLayer imGuiLayer;
 	private FrameBuffer frameBuffer;
 	private PickingTexture pickingTexture;
 	
 	//region Constructor.
-	private Window(String title, Vector3f color, boolean vsync) {
+	private Window(String title, Color color, boolean fullscreen, boolean vsync) {
 		this.title = title;
-		this.width = (int) (videoMode.width() / 1.625);
-		this.height = (int) (videoMode.height() / 1.625);
-		this.r = color.x;
-		this.g = color.y;
-		this.b = color.z;
+		GLFWVidMode videoMode = Objects.requireNonNull(glfwGetVideoMode(glfwGetPrimaryMonitor()));
+		this.width = fullscreen ? videoMode.width() :  (int) (videoMode.width() / 1.5);
+		this.height = fullscreen ? videoMode.height() :  (int) (videoMode.height() / 1.5);
+		this.color = color;
 		this.vsync = vsync;
+		this.fullscreen = fullscreen;
 	}
 	//endregion
 	
 	//region Create windows.
+	public static Window create() {
+		return create("Timble Game Engine (By Aemogie.)");
+	}
 	
 	public static Window create(String title) {
-		return create(title, new Vector3f(0.2f,0.2f,0.2f));
+		return create(title, GREY);
 	}
 	
-	public static Window create(String title, Vector3f color) {
-		return create(title, color, true);
+	public static Window create(String title, Color color) {
+		return create(title, color, false);
 	}
 	
-	public static Window create(String title, Vector3f color, boolean vsync) {
+	public static Window create(String title, Color color, boolean fullScreen) {
+		return create(title, color, fullScreen, true);
+	}
+	
+	public static Window create(String title, Color color, boolean fullScreen, boolean vsync) {
 		GLFWErrorCallback.createPrint(System.err).set();
 		if (!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW!");
-		return new Window(title, color, vsync);
+		return new Window(title, color, fullScreen, vsync);
 	}
 	//endregion
 	
 	//region Main stuff: initialize, loop, destroy.
 	public void run(int scene) {
+		debugLog("Initializing Window...");
 		windowInit(scene);
+		debugLog("Window Initialized!");
+		debugLog("Trying to run window loop...");
 		windowLoop();
+		debugLog("Successfully exited the window loop!");
+		debugLog("Destroying the window context...");
 		windowDestroy();
+		debugLog("Successfully destroyed the current context!");
 	}
 	
 	public void windowInit(int scene) {
@@ -86,7 +100,7 @@ public class Window {
 //		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 		
 		// Create the window
-		glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL); //The long is the memory address of the window.
+		glfwWindow = glfwCreateWindow(this.width, this.height, this.title, fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL); //The long is the memory address of the window.
 		
 		if (glfwWindow == NULL) {
 			throw new IllegalStateException("Failed to create GLFW Window!");
@@ -131,7 +145,7 @@ public class Window {
 		
 		if (currentScene instanceof LevelEditorScene) {
 			imGuiLayer = new ImGuiLayer(glfwWindow, pickingTexture);
-			imGuiLayer.initImGui(new Configuration());
+			imGuiLayer.initImGui();
 		}
 		
 		glViewport(0, 0, width, height);
@@ -161,7 +175,7 @@ public class Window {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
 			Renderer.bindShader(pickingShader);
-			currentScene.render(this);
+			currentScene.render();
 			
 			pickingTexture.disableWriting();
 			glEnable(GL_BLEND);
@@ -171,15 +185,15 @@ public class Window {
 			DebugDraw.beginFrame();
 			
 			currentScene.preFrame(this);
-			
-			glClearColor(r, g, b, 1.0f);
+			Vector3f colorInVec3 = color.toNormVec3();
+			glClearColor(colorInVec3.x, colorInVec3.y, colorInVec3.z, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			
 			if (deltaTime >= 0) {
 				DebugDraw.draw(this);
 				Renderer.bindShader(defaultShader);
-				currentScene.update(this, deltaTime);
-				currentScene.render(this);
+				currentScene.update(deltaTime);
+				currentScene.render();
 			}
 			
 			currentScene.postFrame(this, deltaTime);
@@ -208,10 +222,10 @@ public class Window {
 		if (currentScene != null) currentScene.end(this);
 		switch (newScene) {
 			case 0:
-				currentScene = new LevelEditorScene();
+				currentScene = new LevelEditorScene(this);
 				break;
 			case 1:
-				currentScene = new LevelScene();
+				currentScene = new LevelScene(this);
 				break;
 			default:
 				assert false : "Unknown scene '" + newScene + "'!";
@@ -220,6 +234,7 @@ public class Window {
 		currentScene.load();
 		currentScene.init(this);
 		currentScene.start();
+		debugLog("Successfully changed the scene to: " + currentScene);
 	}
 	
 	public Scene getCurrentScene() {
@@ -256,6 +271,17 @@ public class Window {
 	
 	public PickingTexture getPickingTexture() {
 		return pickingTexture;
+	}
+	//endregion
+	
+	//region Get and set the background color.
+	public Color getColor() {
+		return color;
+	}
+	
+	public void setColor(Color color) {
+		this.color.setColor(color);
+		debugLog("Successfully set the background color to: " + color);
 	}
 	//endregion
 }

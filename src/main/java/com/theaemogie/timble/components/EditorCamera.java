@@ -4,6 +4,7 @@ import com.theaemogie.timble.eventhandlers.MouseListener;
 import com.theaemogie.timble.timble.Camera;
 import com.theaemogie.timble.timble.Window;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
@@ -16,7 +17,7 @@ public class EditorCamera extends Component {
 	private transient int button = GLFW_MOUSE_BUTTON_RIGHT;
 	private transient Camera levelEditorCamera;
 	private transient Vector2f clickOrigin;
-	private float dragSensitivity = 10.0f;
+	private float dragSensitivity = 100.0f;
 	private float scrollSensitivity = 0.1f;
 	
 	public EditorCamera() {

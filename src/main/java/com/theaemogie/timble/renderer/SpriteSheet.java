@@ -1,4 +1,4 @@
-package com.theaemogie.timble.tiles;
+package com.theaemogie.timble.renderer;
 
 import com.theaemogie.timble.renderer.Sprite;
 import com.theaemogie.timble.renderer.Texture;
@@ -12,18 +12,18 @@ import java.util.List;
  */
 public class SpriteSheet {
     
-    private List<Sprite> sprites;
+    protected final List<Sprite> sprites;
     
-    protected SpriteSheet() {}
-    
-    public SpriteSheet(Texture texture, int spriteWidth, int spriteHeight, int numOfSprites, int spacing) {
+    public SpriteSheet(Texture texture, int spriteWidth, int spriteHeight, int spacing) {
+        
+        int numSprites = (texture.getWidth() / spriteWidth) * (texture.getHeight() / spriteHeight);
         
         this.sprites = new ArrayList<>();
     
         int currentX = 0;
         int currentY = texture.getHeight() - spriteHeight;
         
-        for (int i = 0; i < numOfSprites; i++) {
+        for (int i = 0; i < numSprites; i++) {
             float topY = (currentY + spriteHeight) / (float) texture.getHeight();
             float rightX = (currentX + spriteWidth) / (float) texture.getWidth();
             float leftX = currentX / (float) texture.getWidth();

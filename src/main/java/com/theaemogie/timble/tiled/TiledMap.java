@@ -1,20 +1,22 @@
-package com.theaemogie.timble.tiles;
+package com.theaemogie.timble.tiled;
 
-import com.theaemogie.timble.components.SpriteRenderer;
+import com.google.gson.*;
 import com.theaemogie.timble.renderer.Color;
 import com.theaemogie.timble.renderer.Sprite;
+import com.theaemogie.timble.renderer.SpriteSheet;
 import com.theaemogie.timble.scenes.Scene;
-import com.theaemogie.timble.timble.Transform;
 import com.theaemogie.timble.util.AssetPool;
 import org.joml.Vector2f;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
-import static com.theaemogie.timble.util.JsonParser.*;
 import static com.theaemogie.timble.util.StringUtils.resourcePath;
 
 /**
@@ -22,16 +24,16 @@ import static com.theaemogie.timble.util.StringUtils.resourcePath;
  */
 public class TiledMap {
 	private final HashMap<Integer, SpriteSheet> spriteSheets = new HashMap<>();
-	private final Tile[][][] tileArray;
-	private final int tileWidth, tileHeight;
+	private final Tile[][][] tileArray; // [x][y][layer] - Retrieved in reverse i.e. tileArray[layer][y][x]
+	private final Vector2f tileScale;
+	private final List<Tile> tiles = new ArrayList<>();
+	JsonObject jsonObject;
 	private TiledMapLayer[] maps;
 	private String source = "";
-	private final List<Tile> tiles = new ArrayList<>();
 	
 	public TiledMap(Path filepath, int tileWidth, int tileHeight, Scene scene) {
 		load(filepath, scene);
-		this.tileWidth = tileWidth;
-		this.tileHeight = tileHeight;
+		this.tileScale = new Vector2f(tileWidth, tileHeight);
 		tileArray = new Tile[maps.length][][];
 		for (int i = 0; i < maps.length; i++) {
 			TiledMapLayer tml = maps[i];
@@ -49,6 +51,7 @@ public class TiledMap {
 			System.err.println("Error while reading Tiled Map : " + "\"" + filepath + "\".");
 			System.exit(-1);
 		}
+		jsonObject = new JsonStreamParser(source).next().getAsJsonObject();
 		loadSpritesheets();
 		loadMaps();
 		
@@ -59,51 +62,48 @@ public class TiledMap {
 			if (tml.getHeight() > height) height = tml.getHeight();
 		}
 		
-		scene.setMapWidth(width);
-		scene.setMapHeight(height);
+		scene.setMapWidth(jsonObject.getAsJsonPrimitive("width").getAsInt());
+		scene.setMapHeight(jsonObject.getAsJsonPrimitive("height").getAsInt());
 	}
 	
 	private void loadMaps() {
 		
-		String[] mapLayers = getArrayValue(source, "layers", "nextlayerid", "}\\s*,\\s*\\{|\\s*}],");
+		Gson gson = new Gson();
+		
+		JsonArray jsonMap = jsonObject.getAsJsonArray("layers");
 		
 		List<TiledMapLayer> tiledMapLayers = new ArrayList<>();
 		
-		for (String mapLayer : mapLayers) {
-			List<String> dataStringList = Arrays.asList(getArrayValue(mapLayer, "data"));
-			List<Integer> dataList = new ArrayList<>();
-			dataStringList.forEach(dataString -> dataList.add(Integer.parseInt(dataString)));
-			int[] data = dataList.stream().mapToInt(integer -> integer).toArray();
+		for (JsonElement jsonElement : jsonMap) {
+			JsonObject mapLayer = jsonElement.getAsJsonObject();
 			tiledMapLayers.add(new TiledMapLayer(
-					getIntegerValue(mapLayer, "id", true),
-					data,
-					getBooleanValue(mapLayer, "visible", true),
-					getFloatValue(mapLayer, "opacity", true),
+					mapLayer.get("id").getAsInt(),
+					gson.fromJson(mapLayer.get("data"), int[].class),
+					mapLayer.get("visible").getAsBoolean(),
+					mapLayer.get("opacity").getAsFloat(),
+					new Vector2f(mapLayer.get("width").getAsInt(), mapLayer.get("height").getAsInt()),
 					new Vector2f(
-							getIntegerValue(mapLayer, "width", true),
-							getIntegerValue(mapLayer, "height", true)
-					),
-					new Vector2f(
-							getIntegerValue(mapLayer, "offsetx", false),
-							getIntegerValue(mapLayer, "offsety", false)
+							mapLayer.get("offsetx") != null ? mapLayer.get("offsetx").getAsFloat() : 0,
+							mapLayer.get("offsety") != null ? mapLayer.get("offsety").getAsFloat() : 0
 					)
 			));
 		}
-		System.gc();
 		maps = tiledMapLayers.toArray(new TiledMapLayer[0]);
+		System.gc();
 	}
 	
 	private void loadSpritesheets() {
-		String[] tsxLayers = getArrayValue(source, "tilesets", "tilewidth", "}\\s*,\\s*\\{|\\s*}],");
+		JsonArray tsxLayers = jsonObject.get("tilesets").getAsJsonArray();
 		
-		for (String tsxLayer : tsxLayers) {
-			Path filepath = resourcePath("tilemap/" + getStringValue_KC(tsxLayer, "source", true));
+		for (JsonElement jsonElement : tsxLayers) {
+			JsonObject tsxLayer = jsonElement.getAsJsonObject();
+			Path filepath = resourcePath("tilemap", tsxLayer.get("source").getAsString());
 			TileSet tileSet = TileSet.create(filepath);
 			
 			AssetPool.addSpriteSheet(filepath, tileSet);
 			
 			spriteSheets.put(
-					getIntegerValue(tsxLayer, "firstgid", true),
+					tsxLayer.get("firstgid").getAsInt(),
 					AssetPool.getSpriteSheet(filepath)
 			);
 		}
@@ -133,17 +133,16 @@ public class TiledMap {
 		int texPos = tml.getData()[((tml.getWidth()) * ((tml.getHeight() - 1) - y)) + x];
 		if (texPos <= 0) return;
 		//region Create GameObject.
-		tileArray[layer][x][y] = new Tile(
-				x, y,
-				new Transform(
-						new Vector2f(
-								(x * tileWidth) + tml.getOffsetX(),
-								(y * tileWidth) + tml.getOffsetY()
-						),
-						new Vector2f(tileWidth, tileHeight)
-				)).addComponent(new SpriteRenderer().setSprite(getSprite(texPos)).setColor(new Color(1, 1, 1, tml.getOpacity(), true)));
-				
-
+		tileArray[layer][x][y] =
+				new Tile(
+						x, y, layer,
+						tileScale,
+						tml.getOffset(),
+						getSprite(texPos),
+						new Color(tml.getOpacity(), true)
+				);
+		
+		
 		//endregion
 		tiles.add(tileArray[layer][x][y]);
 	}
