@@ -1,5 +1,6 @@
 # timble.
-![Banner for the engine!](https://github.com/aemogie/Timble/blob/master/src/main/resources/Timble%20Banner.png)</br>
+![Banner for the engine!](https://raw.githubusercontent.com/aemogie/Timble/master/src/main/resources/Timble%20Banner.png)
+</br>
 ---
 `timble.` is the name I gave to the game engine I am making in order to learn LWJGL. 
 
