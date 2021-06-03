@@ -79,7 +79,7 @@ public class Window {
 	//endregion
 	
 	//region Main stuff: initialize, loop, destroy.
-	public void run(int scene) {
+	public void run(Scene scene) {
 		Logger.debugLog("Initializing Window...");
 		windowInit(scene);
 		Logger.debugLog("Window Initialized!");
@@ -91,7 +91,7 @@ public class Window {
 		Logger.debugLog("Successfully destroyed the current context!");
 	}
 	
-	public void windowInit(int scene) {
+	public void windowInit(Scene scene) {
 		//Properties
 		glfwDefaultWindowHints(); //Default window hints
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); //Invisible till setup is complete
@@ -217,19 +217,9 @@ public class Window {
 	//endregion
 	
 	//region Get and set scenes.
-	public void changeScene(int newScene) {
+	public void changeScene(Scene newScene) {
 		if (currentScene != null) currentScene.end(this);
-		switch (newScene) {
-			case 0:
-				currentScene = new LevelEditorScene(this);
-				break;
-			case 1:
-				currentScene = new LevelScene(this);
-				break;
-			default:
-				assert false : "Unknown scene '" + newScene + "'!";
-				break;
-		}
+		currentScene = newScene;
 		currentScene.load();
 		currentScene.init(this);
 		currentScene.start();

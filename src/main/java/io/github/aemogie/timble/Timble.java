@@ -1,5 +1,6 @@
 package io.github.aemogie.timble;
 
+import io.github.aemogie.timble.scenes.LevelScene;
 import io.github.aemogie.timble.timble.Window;
 import io.github.aemogie.timble.util.PresetsSettings;
 
@@ -9,7 +10,7 @@ import io.github.aemogie.timble.util.PresetsSettings;
 public class Timble {
 	public static Window mainWindow;
 	public static void main(String[] args) {
-		mainWindow = Window.create("Timble Game Engine (By Aemogie.)", PresetsSettings.GREY, false, true);
-		mainWindow.run(1);
+		mainWindow = Window.create("Timble Game Engine (By aemogie.)", PresetsSettings.GREY, false, true);
+		mainWindow.run(new LevelScene(mainWindow));
 	}
 }
