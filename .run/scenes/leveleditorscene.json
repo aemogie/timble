@@ -1,0 +1,10 @@
+{
+	"tileScale": {
+		"x": 32,
+		"y": 32
+	},
+	"fadeTime": 1,
+	"dynamicLightRadius": 256,
+	"dynamicLightIntensity": 0,
+	"mapPath": "tilemap/map.json"
+}

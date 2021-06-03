@@ -3,5 +3,5 @@
 /.idea/
 /build/
 /exports/
-/.run/*
+/.run/player.dat
 /src/main/resources/external/
