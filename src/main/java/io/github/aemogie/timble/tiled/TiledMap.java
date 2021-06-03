@@ -48,7 +48,7 @@ public class TiledMap {
 		try {
 			source = new String(Files.readAllBytes(filepath));
 		} catch (IOException error) {
-			System.err.println("Error while reading Tiled Map : " + "\"" + filepath + "\".");
+			System.err.println("Error while reading Tiled Map: " + "\"" + filepath.toAbsolutePath() + "\".");
 			System.exit(-1);
 		}
 		jsonObject = new JsonStreamParser(source).next().getAsJsonObject();

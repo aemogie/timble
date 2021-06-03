@@ -21,7 +21,7 @@ void main() {
 	fTexID = aTexID;
 	gl_Position = uProjection * uView * uvec4(aPos, 1.0);
 }
-	
+
 #type GL_FRAGMENT_SHADER
 #version 330 core
 
@@ -35,7 +35,6 @@ in float fTexID;
 uniform sampler2D textures[8];
 uniform float timeElapsed, fadeTime;
 //Dynamic lighting.
-uniform bool lighting;
 uniform int lightCount;
 uniform vec2 lights[MAX_LIGHTS];
 uniform float radius, intensity;
@@ -73,10 +72,10 @@ void main() {
 	} else {
 		color = fColor;
 	}
-	
+
 	vec3 myColor = color.rgb - intensity;
-	
-	if (lighting) {
+
+	if (intensity > 0) {
 		for (int i = 0; i < lightCount; i++) {
 			float dl = dynamicLighting(lights[i]);
 			if (dl != intensity) {
@@ -85,6 +84,6 @@ void main() {
 		}
 	}
 	color.rgb = myColor;
-	
+
 	color = fade();
 }
