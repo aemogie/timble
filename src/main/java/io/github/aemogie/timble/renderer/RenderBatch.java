@@ -178,18 +178,10 @@ public class RenderBatch {
 			shader.uploadFloat("fadeTime", scene.getFadeTime());
 		}
 		
-		
-		if (scene instanceof LevelScene) {
-			LevelScene levelScene = (LevelScene) scene;
-			shader.uploadBoolean("lighting", true);
-			Vector2f[] dynLights = new Vector2f[]{levelScene.getDLPlayerPos()};
-			shader.uploadVec2fArray("lights", dynLights);
-			shader.uploadInt("lightCount", dynLights.length);
-			shader.uploadFloat("radius", levelScene.getDLRadius());
-			shader.uploadFloat("intensity", levelScene.getDlIntensity());
-		} else {
-			shader.uploadBoolean("lighting", false);
-		}
+		shader.uploadVec2fArray("lights", scene.getDynLights());
+		shader.uploadInt("lightCount", scene.getDynLights().length);
+		shader.uploadFloat("radius", scene.getDLRadius());
+		shader.uploadFloat("intensity", scene.getDlIntensity());
 		
 		//endregion
 		

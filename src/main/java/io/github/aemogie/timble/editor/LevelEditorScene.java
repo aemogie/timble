@@ -25,12 +25,8 @@ public class LevelEditorScene extends Scene {
 	
 	private GameObject levelEditorComponents = null;
 	
-	public LevelEditorScene(Window window) {
-		super(
-				window,
-				new Vector2i(32, 32),
-				0f
-		);
+	public LevelEditorScene(Window window) throws IOException {
+		super(window, "levelscene.json");
 	}
 	
 	@Override
