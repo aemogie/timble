@@ -2,7 +2,6 @@
 /.gradle/
 /.idea/
 /build/
-/gradle/
 /exports/
 /.run/*
 /src/main/resources/external/
